@@ -11,7 +11,7 @@
 
     <artifactId>webApp</artifactId>
     <packaging>war</packaging>
-    <name>STARS web APP</name>
+    <name>STARS cz.muni.fi.pv168.web APP</name>
 
     <build>
         <!-- what to do when only "mvn" is run -->
