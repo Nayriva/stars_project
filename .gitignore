@@ -1,0 +1,12 @@
+# Created by .ignore support plugin (hsz.mobi)
+
+.idea
+.settings
+.project
+test-output
+.classpath
+*.iml
+*~
+target
+derby.log
+

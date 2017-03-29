@@ -1,0 +1,2 @@
+INSERT INTO ASSIGNMENTS(mission_id, agent_id, starting, ending) VALUES (1, 1, '2015-02-20', NULL);
+INSERT INTO ASSIGNMENTS(mission_id, agent_id, starting, ending) VALUES (2, 2, '2015-02-18', '2015-02-19');

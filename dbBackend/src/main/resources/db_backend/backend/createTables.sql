@@ -1,0 +1,44 @@
+CREATE TABLE agents (
+    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY CONSTRAINT agents_pk PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    sp_power INT NOT NULL,
+    alive BOOLEAN NOT NULL,
+    rank INT NOT NULL,
+    on_mission BOOLEAN NOT NULL
+);
+
+
+CREATE TABLE assignments (
+    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY CONSTRAINT assignments_pk PRIMARY KEY,
+    mission_id BIGINT NOT NULL,
+    agent_id BIGINT NOT NULL,
+    starting DATE NOT NULL,
+    ending DATE
+);
+
+CREATE TABLE missions (
+    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY CONSTRAINT missions_pk PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    task VARCHAR(255) NOT NULL,
+    place VARCHAR(255) NOT NULL,
+    suc BOOLEAN NOT NULL,
+    fin BOOLEAN NOT NULL,
+    min_ag_rank INT NOT NULL
+);
+
+CREATE TABLE sp_powers (
+    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY CONSTRAINT sp_powers_pk PRIMARY KEY,
+    pow VARCHAR(255) NOT NULL
+);
+
+INSERT INTO sp_powers (pow) VALUES ('ULTRA SPEED');
+INSERT INTO sp_powers (pow) VALUES ('LASER EYES');
+INSERT INTO sp_powers (pow) VALUES ('SPY');
+INSERT INTO sp_powers (pow) VALUES ('WINGS');
+INSERT INTO sp_powers (pow) VALUES ('MEGA PUNCH');
+INSERT INTO sp_powers (pow) VALUES ('NIGHTVISION');
+INSERT INTO sp_powers (pow) VALUES ('TELEPORT');
+INSERT INTO sp_powers (pow) VALUES ('FIGHTER');
+INSERT INTO sp_powers (pow) VALUES ('ASSASSIN');
+INSERT INTO sp_powers (pow) VALUES ('SNIPER');
+INSERT INTO sp_powers (pow) VALUES ('GUNMASTER');
