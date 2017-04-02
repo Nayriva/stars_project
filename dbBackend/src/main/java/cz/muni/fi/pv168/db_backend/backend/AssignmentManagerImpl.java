@@ -326,10 +326,10 @@ public class AssignmentManagerImpl implements AssignmentManager{
         if (assignment.getMission().getId() == null || assignment.getMission().getId() < 0) {
             throw new EntityValidationException("Invalid mission field: id of mission!");
         }
-        if (assignment.getMission().isSuccessful()) {
+        if (insert && assignment.getMission().isSuccessful()) {
             throw new AssignmentException("Invalid mission field: mission already marked as successful!");
         }
-        if (assignment.getMission().isFinished()) {
+        if (insert && assignment.getMission().isFinished()) {
             throw new AssignmentException("Invalid mission field: mission already marked as finished!");
         }
         if (assignment.getAgent().getId() == null || assignment.getAgent().getId() < 0) {
@@ -338,7 +338,7 @@ public class AssignmentManagerImpl implements AssignmentManager{
         if (!assignment.getAgent().isAlive()) {
             throw new AssignmentException("Invalid agent field: agent is dead!");
         }
-        if (assignment.getAgent().isOnMission()) {
+        if (insert && assignment.getAgent().isOnMission()) {
             throw new AssignmentException("Invalid agent field: agent already assigned to mission!");
         }
         if (assignment.getAgent().getRank() < assignment.getMission().getMinAgentRank()) {
@@ -369,8 +369,10 @@ public class AssignmentManagerImpl implements AssignmentManager{
 
         Assignment result = new Assignment();
         result.setId(rs.getLong("id"));
-        result.setMission(missionManager.findMissionById(rs.getLong("mission_id")));
-        result.setAgent(agentManager.findAgentById(rs.getLong("agent_id")));
+        Mission mission = missionManager.findMissionById(rs.getLong("mission_id"));
+        result.setMission(mission);
+        Agent agent = agentManager.findAgentById(rs.getLong("agent_id"));
+        result.setAgent(agent);
         result.setStart(toLocalDate(rs.getDate("starting")));
         result.setEnd(toLocalDate(rs.getDate("ending")));
 
