@@ -75,10 +75,10 @@ public interface AssignmentManager {
      * @param agent of whose assignments should be found.
      * @return Collection of specified agent's assignments, empty collection if no such has been found.
      * @throws ServiceFailureException when problem with database occurs.
-     * @throws IllegalEntityException when agent ID is null or is not in DB.
+     * @throws IllegalEntityException when agent is null or is not in DB.
      * @throws IllegalArgumentException when agent is null.
      */
-    List<Assignment> findAssignmentsOfAgent(Agent agent)
+    List<Assignment> findAssignmentsOfAgent(Long agent)
             throws ServiceFailureException, IllegalEntityException;
 
     /**
@@ -86,10 +86,10 @@ public interface AssignmentManager {
      * @param mission of which assignments should be found.
      * @return Collection of specified mission's assignments, empty collection if no such has been found.
      * @throws ServiceFailureException when problem with database occurs.
-     * @throws IllegalEntityException when mission ID is null or is not in DB.
+     * @throws IllegalEntityException when mission is null or is not in DB.
      * @throws IllegalArgumentException when mission is null.
      */
-    List<Assignment> findAssignmentsOfMission(Mission mission)
+    List<Assignment> findAssignmentsOfMission(Long mission)
             throws ServiceFailureException, IllegalEntityException;
 
     /**

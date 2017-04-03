@@ -9,8 +9,8 @@ import java.time.LocalDate;
  */
 public class Assignment {
     private Long id;
-    private Mission mission;
-    private Agent agent;
+    private Long mission;
+    private Long agent;
     private LocalDate start;
     private LocalDate end;
 
@@ -22,19 +22,19 @@ public class Assignment {
         this.id = id;
     }
 
-    public Mission getMission() {
+    public Long getMission() {
         return mission;
     }
 
-    public void setMission(Mission mission) {
+    public void setMission(Long mission) {
         this.mission = mission;
     }
 
-    public Agent getAgent() {
+    public Long getAgent() {
         return agent;
     }
 
-    public void setAgent(Agent agent) {
+    public void setAgent(Long agent) {
         this.agent = agent;
     }
 
@@ -81,6 +81,6 @@ public class Assignment {
 
     @Override
     public String toString() {
-        return id  + ", mission: " + mission.getId() + ", agent: " + agent.getId();
+        return id  + ", mission: " + mission + ", agent: " + agent;
     }
 }

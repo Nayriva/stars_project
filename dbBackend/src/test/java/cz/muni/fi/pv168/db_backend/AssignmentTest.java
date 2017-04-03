@@ -72,8 +72,8 @@ public class AssignmentTest {
     @Test
     public void toStringOK() {
         String equalString = sampleAssignment.getId()
-                + ", mission: " + sampleAssignment.getMission().getId()
-                + ", agent: " + sampleAssignment.getAgent().getId();
+                + ", mission: " + sampleAssignment.getMission()
+                + ", agent: " + sampleAssignment.getAgent();
 
         assertEquals(equalString, sampleAssignment.toString());
     }
@@ -81,8 +81,8 @@ public class AssignmentTest {
     @Test
     public void toStringNOK() {
         String unequalString = sampleAssignment.getId()
-                + ",mission: " + sampleAssignment.getMission().getId()
-                + "agent: " + sampleAssignment.getAgent().getId();
+                + ",mission: " + sampleAssignment.getMission()
+                + "agent: " + sampleAssignment.getAgent();
 
         assertNotEquals(unequalString, sampleAssignment.toString());
     }
@@ -108,9 +108,9 @@ public class AssignmentTest {
         anotherMission.setFinished(false);
         anotherMission.setMinAgentRank(3);
 
-        sampleAssignment.setMission(sampleMission);
-        equalAssignment.setMission(sampleMission);
-        unequalAssignment.setMission(anotherMission);
+        sampleAssignment.setMission(sampleMission.getId());
+        equalAssignment.setMission(sampleMission.getId());
+        unequalAssignment.setMission(anotherMission.getId());
     }
 
     private void setUpAgents() {
@@ -128,9 +128,8 @@ public class AssignmentTest {
         anotherAgent.setAlive(false);
         anotherAgent.setRank(2);
 
-        sampleAssignment.setAgent(sampleAgent);
-        equalAssignment.setAgent(sampleAgent);
-        unequalAssignment.setAgent(anotherAgent);
+        sampleAssignment.setAgent(sampleAgent.getId());
+        equalAssignment.setAgent(sampleAgent.getId());
+        unequalAssignment.setAgent(anotherAgent.getId());
     }
-
 }

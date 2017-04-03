@@ -80,8 +80,8 @@ public class AssignmentManagerImplTest {
     private AssignmentBuilder sampleAssignment() {
         return new AssignmentBuilder()
                 .id(null)
-                .mission(existingMission1)
-                .agent(existingAgent1)
+                .mission(existingMission1.getId())
+                .agent(existingAgent1.getId())
                 .start(NOW.toLocalDate())
                 .end(null);
     }
@@ -89,8 +89,8 @@ public class AssignmentManagerImplTest {
     private AssignmentBuilder anotherAssignment() {
         return new AssignmentBuilder()
                 .id(null)
-                .mission(existingMission2)
-                .agent(existingAgent2)
+                .mission(existingMission2.getId())
+                .agent(existingAgent2.getId())
                 .start(NOW.toLocalDate())
                 .end(null);
     }
@@ -207,7 +207,7 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void createAssignmentWithNotInDBMission() {
-        Assignment sampleAssignment = sampleAssignment().mission(notInDBMission).build();
+        Assignment sampleAssignment = sampleAssignment().mission(notInDBMission.getId()).build();
 
         expectedException.expect(EntityValidationException.class);
         manager.createAssignment(sampleAssignment);
@@ -217,7 +217,7 @@ public class AssignmentManagerImplTest {
     public void createAssignmentWithNegativeMissionId() {
         Mission mission = notInDBMission;
         mission.setId(-1L);
-        Assignment sampleAssignment = sampleAssignment().mission(notInDBMission).build();
+        Assignment sampleAssignment = sampleAssignment().mission(notInDBMission.getId()).build();
 
         expectedException.expect(EntityValidationException.class);
         manager.createAssignment(sampleAssignment);
@@ -228,7 +228,7 @@ public class AssignmentManagerImplTest {
         Mission mission = existingMission1;
         mission.setSuccessful(true);
         missionManager.updateMission(mission);
-        Assignment assignment = sampleAssignment().mission(mission).build();
+        Assignment assignment = sampleAssignment().mission(mission.getId()).build();
 
         expectedException.expect(AssignmentException.class);
         manager.createAssignment(assignment);
@@ -239,7 +239,7 @@ public class AssignmentManagerImplTest {
         Mission mission = existingMission1;
         existingMission1.setFinished(true);
         missionManager.updateMission(mission);
-        Assignment assignment = sampleAssignment().mission(mission).build();
+        Assignment assignment = sampleAssignment().mission(mission.getId()).build();
 
         expectedException.expect(AssignmentException.class);
         manager.createAssignment(assignment);
@@ -255,7 +255,7 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void createAssignmentWithNotInDBAgent() {
-        Assignment sampleAssignment = sampleAssignment().agent(notInDBAgent).build();
+        Assignment sampleAssignment = sampleAssignment().agent(notInDBAgent.getId()).build();
 
         expectedException.expect(EntityValidationException.class);
         manager.createAssignment(sampleAssignment);
@@ -265,7 +265,7 @@ public class AssignmentManagerImplTest {
     public void createAssignmentWithNegativeAgentId() {
         Agent agent = notInDBAgent;
         agent.setId(-1L);
-        Assignment sampleAssignment = sampleAssignment().agent(notInDBAgent).build();
+        Assignment sampleAssignment = sampleAssignment().agent(notInDBAgent.getId()).build();
 
         expectedException.expect(EntityValidationException.class);
         manager.createAssignment(sampleAssignment);
@@ -276,7 +276,7 @@ public class AssignmentManagerImplTest {
         Agent agent = existingAgent1;
         agent.setAlive(false);
         agentManager.updateAgent(agent);
-        Assignment assignment = sampleAssignment().agent(agent).build();
+        Assignment assignment = sampleAssignment().agent(agent.getId()).build();
 
         expectedException.expect(AssignmentException.class);
         manager.createAssignment(assignment);
@@ -287,7 +287,7 @@ public class AssignmentManagerImplTest {
         Agent agent = existingAgent1;
         agent.setOnMission(true);
         agentManager.updateAgent(agent);
-        Assignment assignment = sampleAssignment().agent(agent).build();
+        Assignment assignment = sampleAssignment().agent(agent.getId()).build();
 
         expectedException.expect(AssignmentException.class);
         manager.createAssignment(assignment);
@@ -303,7 +303,7 @@ public class AssignmentManagerImplTest {
         agentManager.updateAgent(agent);
 
         expectedException.expect(AssignmentException.class);
-        manager.createAssignment(sampleAssignment().mission(mission).agent(agent).build());
+        manager.createAssignment(sampleAssignment().mission(mission.getId()).agent(agent.getId()).build());
     }
 
     @Test
@@ -362,14 +362,14 @@ public class AssignmentManagerImplTest {
     public void findAssignmentsOfAgent() {
         Agent agent1 = existingAgent1;
         Agent agent2 = existingAgent2;
-        Assignment a1 = sampleAssignment().agent(agent1).build();
-        Assignment a2 = anotherAssignment().agent(agent2).build();
+        Assignment a1 = sampleAssignment().agent(agent1.getId()).build();
+        Assignment a2 = anotherAssignment().agent(agent2.getId()).build();
         List<Assignment> result;
 
         manager.createAssignment(a1);
         manager.createAssignment(a2);
 
-        result = manager.findAssignmentsOfAgent(agent1);
+        result = manager.findAssignmentsOfAgent(agent1.getId());
 
         assertEquals(1, result.size());
         assertNotSame(a1, result.get(0));
@@ -380,14 +380,14 @@ public class AssignmentManagerImplTest {
     public void findAssignmentsOfMission() {
         Mission mission1 = existingMission1;
         Mission mission2 = existingMission2;
-        Assignment a1 = sampleAssignment().mission(mission1).build();
-        Assignment a2 = sampleAssignment().mission(mission2).build();
+        Assignment a1 = sampleAssignment().mission(mission1.getId()).build();
+        Assignment a2 = sampleAssignment().mission(mission2.getId()).build();
         List<Assignment> result;
 
         manager.createAssignment(a1);
         manager.createAssignment(a2);
 
-        result = manager.findAssignmentsOfMission(mission1);
+        result = manager.findAssignmentsOfMission(mission1.getId());
 
         assertEquals(1, result.size());
         assertNotSame(a1, result.get(0));
@@ -444,21 +444,12 @@ public class AssignmentManagerImplTest {
     }
 
     @Test
-    public void findAssignmentsOfMissionPassingMissionWithNullID() {
-        Mission mission = notInDBMission;
-        mission.setId(null);
-
-        expectedException.expect(IllegalEntityException.class);
-        manager.findAssignmentsOfMission(mission);
-    }
-
-    @Test
     public void findAssignmentsOfMissionPassingMissionWithNegativeId() {
         Mission mission = notInDBMission;
         mission.setId(-1L);
 
         expectedException.expect(IllegalEntityException.class);
-        manager.findAssignmentsOfMission(mission);
+        manager.findAssignmentsOfMission(mission.getId());
     }
 
     @Test
@@ -468,21 +459,12 @@ public class AssignmentManagerImplTest {
     }
 
     @Test
-    public void findAssignmentsOfAgentPassingAgentWithNullID() {
-        Agent agent = notInDBAgent;
-        notInDBAgent.setId(null);
-
-        expectedException.expect(IllegalEntityException.class);
-        manager.findAssignmentsOfAgent(agent);
-    }
-
-    @Test
     public void findAssignmentsOfAgentPassingAgentWithNegativeId() {
         Agent agent = notInDBAgent;
         agent.setId(-1L);
 
         expectedException.expect(IllegalEntityException.class);
-        manager.findAssignmentsOfAgent(agent);
+        manager.findAssignmentsOfAgent(agent.getId());
     }
 
     //--------------------------------------------------
@@ -491,12 +473,12 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void updateAssignmentUpdatingMission() {
-        testUpdateAssignment((assignment) -> assignment.setMission(existingMission2));
+        testUpdateAssignment((assignment) -> assignment.setMission(existingMission2.getId()));
     }
 
     @Test
     public void updateAssignmentUpdatingAgent() {
-        testUpdateAssignment((assignment) -> assignment.setAgent(existingAgent2));
+        testUpdateAssignment((assignment) -> assignment.setAgent(existingAgent2.getId()));
     }
 
     @Test
@@ -553,7 +535,7 @@ public class AssignmentManagerImplTest {
         Assignment sampleAssignment = sampleAssignment().build();
         manager.createAssignment(sampleAssignment);
         notInDBMission.setId(null);
-        sampleAssignment.setMission(notInDBMission);
+        sampleAssignment.setMission(notInDBMission.getId());
 
         expectedException.expect(EntityValidationException.class);
         manager.updateAssignment(sampleAssignment);
@@ -563,9 +545,7 @@ public class AssignmentManagerImplTest {
     public void updateAssignmentWithNegativeMissionId() {
         Assignment sampleAssignment = sampleAssignment().build();
         manager.createAssignment(sampleAssignment);
-        Mission mission = sampleAssignment.getMission();
-        mission.setId(-1L);
-        sampleAssignment.setMission(mission);
+        sampleAssignment.setMission(-1L);
 
         expectedException.expect(EntityValidationException.class);
         manager.updateAssignment(sampleAssignment);
@@ -573,12 +553,12 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void updateAssignmentMissionToSuccessfulMission() {
-        Assignment sampleAssignment = sampleAssignment().build();
+        Assignment sampleAssignment = sampleAssignment().mission(existingMission1.getId()).build();
         manager.createAssignment(sampleAssignment);
-        Mission mission = sampleAssignment.getMission();
+        Mission mission = existingMission2;
         mission.setSuccessful(true);
         missionManager.updateMission(mission);
-        sampleAssignment.setMission(mission);
+        sampleAssignment.setMission(mission.getId());
 
         expectedException.expect(AssignmentException.class);
         manager.updateAssignment(sampleAssignment);
@@ -586,12 +566,12 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void updateAssignmentMissionToFinishedMission() {
-        Assignment sampleAssignment = sampleAssignment().build();
+        Assignment sampleAssignment = sampleAssignment().mission(existingMission1.getId()).build();
         manager.createAssignment(sampleAssignment);
-        Mission mission = sampleAssignment.getMission();
+        Mission mission = existingMission2;
         mission.setFinished(true);
         missionManager.updateMission(mission);
-        sampleAssignment.setMission(mission);
+        sampleAssignment.setMission(mission.getId());
 
         expectedException.expect(AssignmentException.class);
         manager.updateAssignment(sampleAssignment);
@@ -612,7 +592,7 @@ public class AssignmentManagerImplTest {
         Assignment assignment = sampleAssignment().build();
         manager.createAssignment(assignment);
         notInDBAgent.setId(null);
-        assignment.setAgent(notInDBAgent);
+        assignment.setAgent(notInDBAgent.getId());
 
         expectedException.expect(EntityValidationException.class);
         manager.updateAssignment(assignment);
@@ -624,7 +604,7 @@ public class AssignmentManagerImplTest {
         manager.createAssignment(assignment);
         Agent agent = notInDBAgent;
         notInDBAgent.setId(-1L);
-        assignment.setAgent(agent);
+        assignment.setAgent(agent.getId());
 
         expectedException.expect(EntityValidationException.class);
         manager.updateAssignment(assignment);
@@ -632,12 +612,12 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void updateAssignmentAgentToDeadAgent() {
-        Assignment sampleAssignment = sampleAssignment().build();
+        Assignment sampleAssignment = sampleAssignment().agent(existingAgent1.getId()).build();
         manager.createAssignment(sampleAssignment);
-        Agent agent = sampleAssignment.getAgent();
+        Agent agent = existingAgent2;
         agent.setAlive(false);
         agentManager.updateAgent(agent);
-        sampleAssignment.setAgent(agent);
+        sampleAssignment.setAgent(agent.getId());
 
         expectedException.expect(AssignmentException.class);
         manager.updateAssignment(sampleAssignment);
@@ -645,12 +625,12 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void updateAssignmentAgentToAgentAlreadyOnMission() {
-        Assignment sampleAssignment = sampleAssignment().build();
+        Assignment sampleAssignment = sampleAssignment().agent(existingAgent1.getId()).build();
         manager.createAssignment(sampleAssignment);
-        Agent agent = sampleAssignment.getAgent();
+        Agent agent = existingAgent2;
         agent.setOnMission(true);
         agentManager.updateAgent(agent);
-        sampleAssignment.setAgent(agent);
+        sampleAssignment.setAgent(agent.getId());
 
         expectedException.expect(AssignmentException.class);
         manager.updateAssignment(sampleAssignment);
@@ -658,19 +638,20 @@ public class AssignmentManagerImplTest {
 
     @Test
     public void updateAssignmentAgentToWithLowRank() {
-        Assignment sampleAssignment = sampleAssignment().build();
-        manager.createAssignment(sampleAssignment);
-        Mission mission = sampleAssignment.getMission();
+        Assignment assignment = sampleAssignment().mission(existingMission1.getId())
+                .agent(existingAgent1.getId()).build();
+        manager.createAssignment(assignment);
+        Mission mission = existingMission1;
         mission.setMinAgentRank(2);
         missionManager.updateMission(mission);
-        sampleAssignment.setMission(mission);
-        Agent agent = sampleAssignment.getAgent();
+        assignment.setMission(mission.getId());
+        Agent agent = existingAgent2;
         agent.setRank(1);
         agentManager.updateAgent(agent);
-        sampleAssignment.setAgent(agent);
+        assignment.setAgent(agent.getId());
 
         expectedException.expect(AssignmentException.class);
-        manager.updateAssignment(sampleAssignment);
+        manager.updateAssignment(assignment);
     }
 
     @Test

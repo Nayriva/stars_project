@@ -13,8 +13,8 @@ import java.time.LocalDate;
  */
 public class AssignmentBuilder {
     private Long id;
-    private Mission mission;
-    private Agent agent;
+    private Long mission;
+    private Long agent;
     private LocalDate start;
     private LocalDate end;
 
@@ -23,12 +23,12 @@ public class AssignmentBuilder {
         return this;
     }
 
-    public AssignmentBuilder mission(Mission mission) {
+    public AssignmentBuilder mission(Long mission) {
         this.mission = mission;
         return this;
     }
 
-    public AssignmentBuilder agent(Agent agent) {
+    public AssignmentBuilder agent(Long agent) {
         this.agent = agent;
         return this;
     }
