@@ -46,8 +46,8 @@ public class AssignmentBuilder {
     public Assignment build() {
         Assignment assignment = new Assignment();
         assignment.setId(id);
-        assignment.setMission(mission);
-        assignment.setAgent(agent);
+        assignment.setMission(mission.getId());
+        assignment.setAgent(agent.getId());
         assignment.setStart(start);
         assignment.setEnd(end);
         return assignment;

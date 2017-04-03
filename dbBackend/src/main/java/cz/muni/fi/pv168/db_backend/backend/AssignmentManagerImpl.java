@@ -50,8 +50,8 @@ public class AssignmentManagerImpl implements AssignmentManager{
                     "INSERT INTO assignments(mission_id, agent_id, starting, ending) " +
                             "VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS))
             {
-                stm.setLong(1, assignment.getMission().getId());
-                stm.setLong(2, assignment.getAgent().getId());
+                stm.setLong(1, assignment.getMission());
+                stm.setLong(2, assignment.getAgent());
                 assignment.setStart(LocalDate.now(clock));
                 stm.setDate(3, toSQLDate(assignment.getStart()));
                 stm.setDate(4, toSQLDate(assignment.getEnd()));
@@ -97,8 +97,8 @@ public class AssignmentManagerImpl implements AssignmentManager{
             try (PreparedStatement stm = conn.prepareStatement(
                     "UPDATE assignments SET mission_id = ?, agent_id = ?, ending = ? WHERE id = ?"))
             {
-                stm.setLong(1, assignment.getMission().getId());
-                stm.setLong(2, assignment.getAgent().getId());
+                stm.setLong(1, assignment.getMission());
+                stm.setLong(2, assignment.getAgent());
                 stm.setDate(3, toSQLDate(assignment.getEnd()));
                 stm.setLong(4, assignment.getId());
 
@@ -206,15 +206,13 @@ public class AssignmentManagerImpl implements AssignmentManager{
     }
 
     @Override
-    public List<Assignment> findAssignmentsOfAgent(Agent agent)
+    public List<Assignment> findAssignmentsOfAgent(Long agent)
             throws ServiceFailureException, IllegalEntityException {
 
         checkDataSource();
         if (agent == null) {
             throw new IllegalArgumentException("Agent is null!");
-        } else if (agent.getId() == null) {
-            throw new IllegalEntityException("Agent hasn't got associated ID!");
-        } else if (agent.getId() < 0) {
+        } else if (agent < 0) {
             throw new IllegalEntityException("Agent's ID must be >= 0!");
         }
 
@@ -223,7 +221,7 @@ public class AssignmentManagerImpl implements AssignmentManager{
             try (PreparedStatement stm = conn.prepareStatement(
                     "SELECT * FROM assignments WHERE agent_id = ?"))
             {
-                stm.setLong(1, agent.getId());
+                stm.setLong(1, agent);
                 result = executeQueryForMoreAssignments(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when listing all assignments of agent " + agent + "!";
@@ -237,16 +235,14 @@ public class AssignmentManagerImpl implements AssignmentManager{
     }
 
     @Override
-    public List<Assignment> findAssignmentsOfMission(Mission mission)
+    public List<Assignment> findAssignmentsOfMission(Long mission)
             throws ServiceFailureException, IllegalEntityException {
 
         checkDataSource();
         if (mission == null) {
             throw new IllegalArgumentException("Mission is null!");
-        } else if (mission.getId() == null) {
-            throw new IllegalEntityException("Agent hasn't got associated ID!");
-        } else if (mission.getId() < 0) {
-            throw new IllegalEntityException("Agent's ID must be >= 0!");
+        } else if (mission < 0) {
+            throw new IllegalEntityException("Mission's ID must be >= 0!");
         }
 
         List<Assignment> result;
@@ -254,7 +250,7 @@ public class AssignmentManagerImpl implements AssignmentManager{
             try (PreparedStatement stm = conn.prepareStatement(
                     "SELECT * FROM assignments WHERE mission_id = ?"))
             {
-                stm.setLong(1, mission.getId());
+                stm.setLong(1, mission);
                 result = executeQueryForMoreAssignments(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when listing all assignments of " + mission + "!";
@@ -311,37 +307,37 @@ public class AssignmentManagerImpl implements AssignmentManager{
         if (assignment == null) {
             throw new IllegalArgumentException("Assignment is null!");
         }
-        if (assignment.getMission() == null) {
-            throw new EntityValidationException("Invalid mission field: mission is null!");
-        }
-        if (assignment.getAgent() == null) {
-            throw new EntityValidationException("Invalid agent field: agent is null!");
-        }
         if (assignment.getStart() == null) {
             throw new EntityValidationException("Invalid start field: start is null!");
+        }
+        if (assignment.getMission() == null || assignment.getMission() < 0) {
+            throw new EntityValidationException("Invalid mission field: id of mission!");
+        }
+        if (assignment.getAgent() == null || assignment.getAgent() < 0) {
+            throw new EntityValidationException("Invalid agent field: id of agent!");
         }
         if (insert && assignment.getEnd() != null) {
             throw new EntityValidationException("Invalid end field: end is not null when creating assignment!");
         }
-        if (assignment.getMission().getId() == null || assignment.getMission().getId() < 0) {
-            throw new EntityValidationException("Invalid mission field: id of mission!");
-        }
-        if (insert && assignment.getMission().isSuccessful()) {
+        AgentManager agentManager = new AgentManagerImpl();
+        agentManager.setDataSource(dataSource);
+        MissionManager missionManager = new MissionManagerImpl();
+        missionManager.setDataSource(dataSource);
+        Agent agent = agentManager.findAgentById(assignment.getAgent());
+        Mission mission = missionManager.findMissionById(assignment.getMission());
+        if (mission.isSuccessful()) {
             throw new AssignmentException("Invalid mission field: mission already marked as successful!");
         }
-        if (insert && assignment.getMission().isFinished()) {
+        if (mission.isFinished()) {
             throw new AssignmentException("Invalid mission field: mission already marked as finished!");
         }
-        if (assignment.getAgent().getId() == null || assignment.getAgent().getId() < 0) {
-            throw new EntityValidationException("Invalid agent field: id of agent!");
-        }
-        if (!assignment.getAgent().isAlive()) {
+        if (! agent.isAlive()) {
             throw new AssignmentException("Invalid agent field: agent is dead!");
         }
-        if (insert && assignment.getAgent().isOnMission()) {
+        if (agent.isOnMission()) {
             throw new AssignmentException("Invalid agent field: agent already assigned to mission!");
         }
-        if (assignment.getAgent().getRank() < assignment.getMission().getMinAgentRank()) {
+        if (agent.getRank() < mission.getMinAgentRank()) {
             throw new AssignmentException(
                     "Invalid assignment: agent's rank is not high enough for this mission!");
         }
@@ -369,10 +365,8 @@ public class AssignmentManagerImpl implements AssignmentManager{
 
         Assignment result = new Assignment();
         result.setId(rs.getLong("id"));
-        Mission mission = missionManager.findMissionById(rs.getLong("mission_id"));
-        result.setMission(mission);
-        Agent agent = agentManager.findAgentById(rs.getLong("agent_id"));
-        result.setAgent(agent);
+        result.setMission(rs.getLong("mission_id"));
+        result.setAgent(rs.getLong("agent_id"));
         result.setStart(toLocalDate(rs.getDate("starting")));
         result.setEnd(toLocalDate(rs.getDate("ending")));
 
