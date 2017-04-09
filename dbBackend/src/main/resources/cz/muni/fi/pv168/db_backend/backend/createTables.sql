@@ -25,20 +25,3 @@ CREATE TABLE missions (
     fin BOOLEAN NOT NULL,
     min_ag_rank INT NOT NULL
 );
-
-CREATE TABLE sp_powers (
-    id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY CONSTRAINT sp_powers_pk PRIMARY KEY,
-    pow VARCHAR(255) NOT NULL
-);
-
-INSERT INTO sp_powers (pow) VALUES ('ULTRA SPEED');
-INSERT INTO sp_powers (pow) VALUES ('LASER EYES');
-INSERT INTO sp_powers (pow) VALUES ('SPY');
-INSERT INTO sp_powers (pow) VALUES ('WINGS');
-INSERT INTO sp_powers (pow) VALUES ('MEGA PUNCH');
-INSERT INTO sp_powers (pow) VALUES ('NIGHTVISION');
-INSERT INTO sp_powers (pow) VALUES ('TELEPORT');
-INSERT INTO sp_powers (pow) VALUES ('FIGHTER');
-INSERT INTO sp_powers (pow) VALUES ('ASSASSIN');
-INSERT INTO sp_powers (pow) VALUES ('SNIPER');
-INSERT INTO sp_powers (pow) VALUES ('GUNMASTER');
