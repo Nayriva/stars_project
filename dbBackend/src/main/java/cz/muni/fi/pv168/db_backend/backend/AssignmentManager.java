@@ -35,11 +35,9 @@ public interface AssignmentManager {
      * @param assignment to be updated
      * @throws ServiceFailureException when problem with database occurs.
      * @throws EntityValidationException when one or more fields of Assignment are null.
-     * (Mission is null or has invalid field, Agent is null or has invalid field, start is not NOW, end is not null).
-     * @throws IllegalEntityException when ID is null or assignment is nod in DB.
+     * (Mission is null, Agent is null, start is null)
+     * @throws IllegalEntityException when ID is null or assignment is not in DB.
      * @throws IllegalArgumentException when assignment is null.
-     * @throws AssignmentException when agent's rank is less than mission's minAgentRank, agent is dead,
-     * mission is marked as finished or successful.
      */
     void updateAssignment(Assignment assignment)
             throws ServiceFailureException, EntityValidationException, IllegalEntityException, AssignmentException;

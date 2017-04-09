@@ -552,32 +552,6 @@ public class AssignmentManagerImplTest {
     }
 
     @Test
-    public void updateAssignmentMissionToSuccessfulMission() {
-        Assignment sampleAssignment = sampleAssignment().mission(existingMission1.getId()).build();
-        manager.createAssignment(sampleAssignment);
-        Mission mission = existingMission2;
-        mission.setSuccessful(true);
-        missionManager.updateMission(mission);
-        sampleAssignment.setMission(mission.getId());
-
-        expectedException.expect(AssignmentException.class);
-        manager.updateAssignment(sampleAssignment);
-    }
-
-    @Test
-    public void updateAssignmentMissionToFinishedMission() {
-        Assignment sampleAssignment = sampleAssignment().mission(existingMission1.getId()).build();
-        manager.createAssignment(sampleAssignment);
-        Mission mission = existingMission2;
-        mission.setFinished(true);
-        missionManager.updateMission(mission);
-        sampleAssignment.setMission(mission.getId());
-
-        expectedException.expect(AssignmentException.class);
-        manager.updateAssignment(sampleAssignment);
-    }
-
-    @Test
     public void updateAssignmentWithNullAgent() {
         Assignment assignment = sampleAssignment().build();
         manager.createAssignment(assignment);
@@ -607,50 +581,6 @@ public class AssignmentManagerImplTest {
         assignment.setAgent(agent.getId());
 
         expectedException.expect(EntityValidationException.class);
-        manager.updateAssignment(assignment);
-    }
-
-    @Test
-    public void updateAssignmentAgentToDeadAgent() {
-        Assignment sampleAssignment = sampleAssignment().agent(existingAgent1.getId()).build();
-        manager.createAssignment(sampleAssignment);
-        Agent agent = existingAgent2;
-        agent.setAlive(false);
-        agentManager.updateAgent(agent);
-        sampleAssignment.setAgent(agent.getId());
-
-        expectedException.expect(AssignmentException.class);
-        manager.updateAssignment(sampleAssignment);
-    }
-
-    @Test
-    public void updateAssignmentAgentToAgentAlreadyOnMission() {
-        Assignment sampleAssignment = sampleAssignment().agent(existingAgent1.getId()).build();
-        manager.createAssignment(sampleAssignment);
-        Agent agent = existingAgent2;
-        agent.setOnMission(true);
-        agentManager.updateAgent(agent);
-        sampleAssignment.setAgent(agent.getId());
-
-        expectedException.expect(AssignmentException.class);
-        manager.updateAssignment(sampleAssignment);
-    }
-
-    @Test
-    public void updateAssignmentAgentToWithLowRank() {
-        Assignment assignment = sampleAssignment().mission(existingMission1.getId())
-                .agent(existingAgent1.getId()).build();
-        manager.createAssignment(assignment);
-        Mission mission = existingMission1;
-        mission.setMinAgentRank(2);
-        missionManager.updateMission(mission);
-        assignment.setMission(mission.getId());
-        Agent agent = existingAgent2;
-        agent.setRank(1);
-        agentManager.updateAgent(agent);
-        assignment.setAgent(agent.getId());
-
-        expectedException.expect(AssignmentException.class);
         manager.updateAssignment(assignment);
     }
 

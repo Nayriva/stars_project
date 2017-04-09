@@ -325,19 +325,25 @@ public class AssignmentManagerImpl implements AssignmentManager{
         missionManager.setDataSource(dataSource);
         Agent agent = agentManager.findAgentById(assignment.getAgent());
         Mission mission = missionManager.findMissionById(assignment.getMission());
-        if (mission.isSuccessful()) {
+        if (insert && agent == null) {
+            throw new IllegalEntityException("Invalid agent field: agent not in DB!");
+        }
+        if (insert && mission == null) {
+            throw new IllegalEntityException("Invalid mission field: mission not in DB!");
+        }
+        if (insert && mission.isSuccessful()) {
             throw new AssignmentException("Invalid mission field: mission already marked as successful!");
         }
-        if (mission.isFinished()) {
+        if (insert &&  mission.isFinished()) {
             throw new AssignmentException("Invalid mission field: mission already marked as finished!");
         }
-        if (! agent.isAlive()) {
+        if (insert && ! agent.isAlive()) {
             throw new AssignmentException("Invalid agent field: agent is dead!");
         }
-        if (agent.isOnMission()) {
+        if (insert && agent.isOnMission()) {
             throw new AssignmentException("Invalid agent field: agent already assigned to mission!");
         }
-        if (agent.getRank() < mission.getMinAgentRank()) {
+        if (insert && agent.getRank() < mission.getMinAgentRank()) {
             throw new AssignmentException(
                     "Invalid assignment: agent's rank is not high enough for this mission!");
         }
