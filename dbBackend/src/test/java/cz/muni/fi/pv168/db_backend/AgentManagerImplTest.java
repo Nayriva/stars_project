@@ -30,6 +30,9 @@ public class AgentManagerImplTest {
 
     private AgentManagerImpl manager;
     private DataSource ds;
+    public static final String SP_POWER_IN_DB1 = "NIGHTVISION";
+    public static final String SP_POWER_IN_DB2 = "WINGS";
+    public static final String SP_POWER_NOT_IN_DB = "notInDb";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -51,7 +54,7 @@ public class AgentManagerImplTest {
         return new AgentBuilder()
                 .id(null)
                 .name("Mark")
-                .specialPower(1)
+                .specialPower(SP_POWER_IN_DB1)
                 .alive(true)
                 .rank(2)
                 .onMission(false);
@@ -61,7 +64,7 @@ public class AgentManagerImplTest {
         return new AgentBuilder()
                 .id(null)
                 .name("Rob")
-                .specialPower(2)
+                .specialPower(SP_POWER_IN_DB2)
                 .alive(true)
                 .rank(3)
                 .onMission(false);
@@ -122,24 +125,16 @@ public class AgentManagerImplTest {
     }
 
     @Test
-    public void createAgentWithNegativeSpecialPower() {
-        Agent agent = sampleAgent().specialPower(-1).build();
+    public void createAgentWithNullSpecialPower() {
+        Agent agent = sampleAgent().specialPower(null).build();
 
         expectedException.expect(EntityValidationException.class);
         manager.createAgent(agent);
     }
 
     @Test
-    public void createAgentWithZeroSpecialPower() {
-        Agent agent = sampleAgent().specialPower(0).build();
-
-        expectedException.expect(EntityValidationException.class);
-        manager.createAgent(agent);
-    }
-
-    @Test
-    public void createAgentWithBigSpecialPower() {
-        Agent agent = sampleAgent().specialPower(12).build();
+    public void createAgentWithEmptySpecialPower() {
+        Agent agent = sampleAgent().specialPower("").build();
 
         expectedException.expect(EntityValidationException.class);
         manager.createAgent(agent);
@@ -256,16 +251,16 @@ public class AgentManagerImplTest {
 
     @Test
     public void findAgentsBySpecialPower() {
-        Agent agent1 = sampleAgent().specialPower(1).build();
-        Agent agent2 = sampleAgent2().specialPower(2).build();
+        Agent agent1 = sampleAgent().specialPower(SP_POWER_IN_DB1).build();
+        Agent agent2 = sampleAgent2().specialPower(SP_POWER_IN_DB2).build();
         manager.createAgent(agent1);
         manager.createAgent(agent2);
 
-        assertThat(manager.findAgentsBySpecialPower(1))
+        assertThat(manager.findAgentsBySpecialPower(SP_POWER_IN_DB1))
                 .usingFieldByFieldElementComparator().containsOnly(agent1);
-        assertThat(manager.findAgentsBySpecialPower(2))
+        assertThat(manager.findAgentsBySpecialPower(SP_POWER_IN_DB2))
                 .usingFieldByFieldElementComparator().containsOnly(agent2);
-        assertThat(manager.findAgentsBySpecialPower(3)).isEmpty();
+        assertThat(manager.findAgentsBySpecialPower(SP_POWER_NOT_IN_DB)).isEmpty();
     }
 
     @Test
@@ -281,22 +276,15 @@ public class AgentManagerImplTest {
     }
 
     @Test
-    public void findAgentsBySpecialPowerPassingNegativeSpecPower() {
+    public void findAgentsBySpecialPowerPassingNullSpecPower() {
         expectedException.expect(IllegalArgumentException.class);
-        manager.findAgentsBySpecialPower(-1);
+        manager.findAgentsBySpecialPower(null);
     }
 
     @Test
-    public void findAgentsBySpecialPowerPassingZeroSpecPower() {
+    public void findAgentsBySpecialPowerPassingEmptySpecPower() {
         expectedException.expect(IllegalArgumentException.class);
-        manager.findAgentsBySpecialPower(0);
-    }
-
-    @Test
-    public void findAgentsBySpecialPowerPassingBigSpecPower() {
-        expectedException.expect(IllegalArgumentException.class);
-        manager.findAgentsBySpecialPower(12);
-
+        manager.findAgentsBySpecialPower("");
     }
 
     //----------------------------------------------------------
@@ -310,7 +298,7 @@ public class AgentManagerImplTest {
 
     @Test
     public void updateAgentSpecialPower() {
-        testUpdateAgent((agent) -> agent.setSpecialPower(8));
+        testUpdateAgent((agent) -> agent.setSpecialPower(SP_POWER_IN_DB2));
     }
 
     @Test
@@ -402,30 +390,20 @@ public class AgentManagerImplTest {
     }
 
     @Test
-    public void updateAgentToNegativeSpecialPower() {
+    public void updateAgentToNullSpecialPower() {
         Agent agent = sampleAgent().build();
         manager.createAgent(agent);
-        agent.setSpecialPower(-1);
+        agent.setSpecialPower(null);
 
         expectedException.expect(EntityValidationException.class);
         manager.updateAgent(agent);
     }
 
     @Test
-    public void updateAgentToZeroSpecialPower() {
+    public void updateAgentToEmptySpecialPower() {
         Agent agent = sampleAgent().build();
         manager.createAgent(agent);
-        agent.setSpecialPower(0);
-
-        expectedException.expect(EntityValidationException.class);
-        manager.updateAgent(agent);
-    }
-
-    @Test
-    public void updateAgentToBigSpecialPower() {
-        Agent agent = sampleAgent().build();
-        manager.createAgent(agent);
-        agent.setSpecialPower(12);
+        agent.setSpecialPower("");
 
         expectedException.expect(EntityValidationException.class);
         manager.updateAgent(agent);
@@ -532,7 +510,7 @@ public class AgentManagerImplTest {
         Agent agent = sampleAgent().build();
         manager.createAgent(agent);
 
-        testExpectedServiceFailureException((manager) -> manager.findAgentsBySpecialPower(1));
+        testExpectedServiceFailureException((manager) -> manager.findAgentsBySpecialPower(SP_POWER_IN_DB1));
     }
 
     @Test

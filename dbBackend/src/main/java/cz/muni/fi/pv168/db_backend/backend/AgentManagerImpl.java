@@ -47,7 +47,7 @@ public class AgentManagerImpl implements AgentManager {
                             " VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS))
             {
                 stm.setString(1, agent.getName());
-                stm.setInt(2, agent.getSpecialPower());
+                stm.setString(2, agent.getSpecialPower());
                 stm.setBoolean(3, agent.isAlive());
                 stm.setInt(4, agent.getRank());
                 stm.setBoolean(5, agent.isOnMission());
@@ -93,7 +93,7 @@ public class AgentManagerImpl implements AgentManager {
                             + " WHERE id = ?"))
             {
                 stm.setString(1, agent.getName());
-                stm.setInt(2, agent.getSpecialPower());
+                stm.setString(2, agent.getSpecialPower());
                 stm.setBoolean(3, agent.isAlive());
                 stm.setInt(4, agent.getRank());
                 stm.setBoolean(5, agent.isOnMission());
@@ -220,20 +220,20 @@ public class AgentManagerImpl implements AgentManager {
     }
 
     @Override
-    public List<Agent> findAgentsBySpecialPower(int specialPower)
+    public List<Agent> findAgentsBySpecialPower(String specialPower)
             throws ServiceFailureException, IllegalArgumentException
     {
         checkDataSource();
-        if (specialPower <= 0) {
-            throw new IllegalArgumentException("SpecialPower must be > 0!");
-        } else if (specialPower >= 12) {
-            throw new IllegalArgumentException("SpecialPower must be < 12!");
+        if (specialPower == null) {
+            throw new IllegalArgumentException("SpecialPower is null!");
+        } else if (specialPower.isEmpty()) {
+            throw new IllegalArgumentException("SpecialPower is empty!");
         }
 
         List<Agent> result;
         try (Connection conn = dataSource.getConnection()) {
             try (PreparedStatement stm = conn.prepareStatement("SELECT * FROM agents WHERE sp_power = ?")) {
-                stm.setInt(1, specialPower);
+                stm.setString(1, specialPower);
                 result = executeQueryForMoreAgents(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when listing agents from DB with special power = " + specialPower + "!";
@@ -286,7 +286,7 @@ public class AgentManagerImpl implements AgentManager {
         if (agent.getRank() <= 0) {
             throw new EntityValidationException("Invalid rank field of agent!");
         }
-        if (agent.getSpecialPower() <= 0 || agent.getSpecialPower() >= 12) {
+        if (agent.getSpecialPower() == null || agent.getSpecialPower().isEmpty()) {
             throw new EntityValidationException("Invalid special power field of agent!");
         }
     }
@@ -322,7 +322,7 @@ public class AgentManagerImpl implements AgentManager {
 
         result.setId(rs.getLong("id"));
         result.setName(rs.getString("name"));
-        result.setSpecialPower(rs.getInt("sp_power"));
+        result.setSpecialPower(rs.getString("sp_power"));
         result.setAlive(rs.getBoolean("alive"));
         result.setRank(rs.getInt("rank"));
         result.setOnMission(rs.getBoolean("on_mission"));

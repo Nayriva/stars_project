@@ -1,7 +1,7 @@
 CREATE TABLE agents (
     id BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY CONSTRAINT agents_pk PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    sp_power INT NOT NULL,
+    sp_power VARCHAR(255) NOT NULL,
     alive BOOLEAN NOT NULL,
     rank INT NOT NULL,
     on_mission BOOLEAN NOT NULL

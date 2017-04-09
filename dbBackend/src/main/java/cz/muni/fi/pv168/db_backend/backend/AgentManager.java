@@ -74,12 +74,12 @@ public interface AgentManager {
 
     /**
      * Find agents with given special power.
-     * @param specialPower int value of specialPower. Mist satisfy 0 < x < 12.
+     * @param specialPower string representing specialPower
      * @return List of agents with given special power, empty collection if none has been found.
      * @throws ServiceFailureException when problem with database occurs.
-     * @throws IllegalArgumentException when specialPower param is not in 0 < x < 12
+     * @throws IllegalArgumentException when specialPower is null or empty
      */
-    List<Agent> findAgentsBySpecialPower(int specialPower)
+    List<Agent> findAgentsBySpecialPower(String specialPower)
             throws ServiceFailureException, IllegalArgumentException;
 
     /**

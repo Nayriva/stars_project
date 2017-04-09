@@ -1,6 +1,7 @@
 package cz.muni.fi.pv168.db_backend;
 
 import cz.muni.fi.pv168.db_backend.backend.Agent;
+import cz.muni.fi.pv168.db_backend.backend.AgentManagerImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,21 +21,21 @@ public class AgentTest {
     public void setUp() throws Exception {
         sampleAgent = new Agent();
         sampleAgent.setId(1L);
-        sampleAgent.setSpecialPower(1);
+        sampleAgent.setSpecialPower(AgentManagerImplTest.SP_POWER_IN_DB1);
         sampleAgent.setName("Mark");
         sampleAgent.setAlive(true);
         sampleAgent.setRank(1);
 
         equalAgent = new Agent();
         equalAgent.setId(1L);
-        equalAgent.setSpecialPower(1);
+        equalAgent.setSpecialPower(AgentManagerImplTest.SP_POWER_IN_DB1);
         equalAgent.setName("Mark");
         equalAgent.setAlive(true);
         equalAgent.setRank(1);
 
         unequalAgent = new Agent();
         unequalAgent.setId(2L);
-        unequalAgent.setSpecialPower(2);
+        unequalAgent.setSpecialPower(AgentManagerImplTest.SP_POWER_NOT_IN_DB);
         unequalAgent.setName("Marcus");
         unequalAgent.setAlive(false);
         unequalAgent.setRank(2);

@@ -116,14 +116,14 @@ public class AssignmentTest {
     private void setUpAgents() {
         Agent sampleAgent = new Agent();
         sampleAgent.setId(1L);
-        sampleAgent.setSpecialPower(1);
+        sampleAgent.setSpecialPower(AgentManagerImplTest.SP_POWER_IN_DB1);
         sampleAgent.setName("Mark");
         sampleAgent.setAlive(true);
         sampleAgent.setRank(1);
 
         Agent anotherAgent = new Agent();
         anotherAgent.setId(2L);
-        anotherAgent.setSpecialPower(2);
+        anotherAgent.setSpecialPower(AgentManagerImplTest.SP_POWER_IN_DB2);
         anotherAgent.setName("Marcus");
         anotherAgent.setAlive(false);
         anotherAgent.setRank(2);

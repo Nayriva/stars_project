@@ -9,7 +9,7 @@ package cz.muni.fi.pv168.db_backend.backend;
 public class Agent {
     private Long id;
     private String name;
-    private int specialPower;
+    private String specialPower;
     private boolean alive;
     private int rank;
     private boolean onMission;
@@ -30,11 +30,11 @@ public class Agent {
         this.name = name;
     }
 
-    public int getSpecialPower() {
+    public String getSpecialPower() {
         return specialPower;
     }
 
-    public void setSpecialPower(int specialPower) {
+    public void setSpecialPower(String specialPower) {
         this.specialPower = specialPower;
     }
 

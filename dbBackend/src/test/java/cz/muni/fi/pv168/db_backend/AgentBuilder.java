@@ -10,7 +10,7 @@ import cz.muni.fi.pv168.db_backend.backend.Agent;
 public class AgentBuilder {
     private Long id;
     private String name;
-    private int specialPower;
+    private String specialPower;
     private boolean alive;
     private int rank;
     private boolean onMission;
@@ -25,7 +25,7 @@ public class AgentBuilder {
         return this;
     }
 
-    public AgentBuilder specialPower(int specialPower) {
+    public AgentBuilder specialPower(String specialPower) {
         this.specialPower = specialPower;
         return this;
     }
