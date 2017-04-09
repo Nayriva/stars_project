@@ -1,4 +1,3 @@
-DROP TABLE agents;
-DROP TABLE assignments;
-DROP TABLE missions;
-DROP TABLE sp_powers;
+DROP TABLE agents if EXISTS;
+DROP TABLE assignments if EXISTS;
+DROP TABLE missions if EXISTS;
