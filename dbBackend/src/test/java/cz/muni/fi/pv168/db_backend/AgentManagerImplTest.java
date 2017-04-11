@@ -56,8 +56,7 @@ public class AgentManagerImplTest {
                 .name("Mark")
                 .specialPower(SP_POWER_IN_DB1)
                 .alive(true)
-                .rank(2)
-                .onMission(false);
+                .rank(2);
     }
 
     private AgentBuilder sampleAgent2() {
@@ -66,8 +65,7 @@ public class AgentManagerImplTest {
                 .name("Rob")
                 .specialPower(SP_POWER_IN_DB2)
                 .alive(true)
-                .rank(3)
-                .onMission(false);
+                .rank(3);
     }
 
     private static DataSource prepareDataSource() throws SQLException {
@@ -159,14 +157,6 @@ public class AgentManagerImplTest {
     @Test
     public void createAgentWithZeroRank() {
         Agent agent = sampleAgent().rank(0).build();
-
-        expectedException.expect(EntityValidationException.class);
-        manager.createAgent(agent);
-    }
-
-    @Test
-    public void createAgentWithOnMissionTrue() {
-        Agent agent = sampleAgent().onMission(true).build();
 
         expectedException.expect(EntityValidationException.class);
         manager.createAgent(agent);
@@ -309,11 +299,6 @@ public class AgentManagerImplTest {
     @Test
     public void updateAgentAlive() {
         testUpdateAgent((agent) -> agent.setAlive(false));
-    }
-
-    @Test
-    public void updateAgentOnMission() {
-        testUpdateAgent((agent) -> agent.setOnMission(true));
     }
 
     @Test

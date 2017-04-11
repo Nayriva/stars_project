@@ -43,14 +43,13 @@ public class AgentManagerImpl implements AgentManager {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement stm = conn.prepareStatement(
-                    "INSERT INTO agents (name, sp_power, alive, rank, on_mission)" +
-                            " VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS))
+                    "INSERT INTO agents (name, sp_power, alive, rank)" +
+                            " VALUES (?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS))
             {
                 stm.setString(1, agent.getName());
                 stm.setString(2, agent.getSpecialPower());
                 stm.setBoolean(3, agent.isAlive());
                 stm.setInt(4, agent.getRank());
-                stm.setBoolean(5, agent.isOnMission());
 
                 int count = stm.executeUpdate();
                 DBUtils.checkUpdatesCount(count, agent, true);
@@ -89,15 +88,14 @@ public class AgentManagerImpl implements AgentManager {
         try (Connection conn = dataSource.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement stm = conn.prepareStatement(
-                    "UPDATE agents SET name = ?, sp_power = ?, alive = ?, rank = ?, on_mission = ?"
+                    "UPDATE agents SET name = ?, sp_power = ?, alive = ?, rank = ?"
                             + " WHERE id = ?"))
             {
                 stm.setString(1, agent.getName());
                 stm.setString(2, agent.getSpecialPower());
                 stm.setBoolean(3, agent.isAlive());
                 stm.setInt(4, agent.getRank());
-                stm.setBoolean(5, agent.isOnMission());
-                stm.setLong(6, agent.getId());
+                stm.setLong(5, agent.getId());
 
                 int count = stm.executeUpdate();
                 DBUtils.checkUpdatesCount(count, agent, false);
@@ -280,9 +278,6 @@ public class AgentManagerImpl implements AgentManager {
         if (insert && !agent.isAlive()) {
             throw new EntityValidationException("Cannot create dead agent!");
         }
-        if (insert && agent.isOnMission()) {
-            throw new EntityValidationException("Cannot create agent who is on a mission!");
-        }
         if (agent.getRank() <= 0) {
             throw new EntityValidationException("Invalid rank field of agent!");
         }
@@ -325,7 +320,6 @@ public class AgentManagerImpl implements AgentManager {
         result.setSpecialPower(rs.getString("sp_power"));
         result.setAlive(rs.getBoolean("alive"));
         result.setRank(rs.getInt("rank"));
-        result.setOnMission(rs.getBoolean("on_mission"));
 
         return result;
     }

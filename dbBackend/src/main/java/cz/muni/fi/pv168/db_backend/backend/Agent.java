@@ -12,7 +12,6 @@ public class Agent {
     private String specialPower;
     private boolean alive;
     private int rank;
-    private boolean onMission;
 
     public Long getId() {
         return id;
@@ -52,14 +51,6 @@ public class Agent {
 
     public void setRank(int rank) {
         this.rank = rank;
-    }
-
-    public boolean isOnMission() {
-        return onMission;
-    }
-
-    public void setOnMission(boolean onMission) {
-        this.onMission = onMission;
     }
 
     @Override
