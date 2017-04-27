@@ -20,8 +20,8 @@ public interface AgentManager {
      * @throws ServiceFailureException when problem with database occurs.
      * @throws IllegalArgumentException when agent is null.
      * @throws EntityValidationException when one or more fields of Agent are invalid.
-     * (Name is null, specialPower is not in 0 < x < 12, rank is not in less or equal 0, onMission is true)
-     * @throws IllegalEntityException when agent has already assigned ID.
+     * (Name is null or empty, specialPower is null or empty, rank is less or equal 0, alive is false).
+     * @throws IllegalEntityException when agent has already got assigned ID.
      */
     void createAgent(Agent agent)
             throws ServiceFailureException, EntityValidationException, IllegalEntityException;
@@ -32,7 +32,7 @@ public interface AgentManager {
      * @throws IllegalArgumentException when agent is null.
      * @throws ServiceFailureException when problem with database occurs.
      * @throws EntityValidationException when one or more fields of Agent are invalid.
-     * (Name is null, specialPower is not in 0 < x < 12, rank is less or equal 0).
+     * (Name is null or empty, specialPower is null or empty, rank is less or equal 0).
      * @throws IllegalEntityException when ID is null or agent is not in DB.
      */
     void updateAgent(Agent agent)
@@ -59,15 +59,15 @@ public interface AgentManager {
 
     /**
      * List all agents from database.
-     * @return List of all Agents.
+     * @return List of all Agents, empty list if no agent is stored in database.
      * @throws ServiceFailureException when problem with database occurs.
      */
     List<Agent> findAllAgents() throws ServiceFailureException;
 
     /**
-     * Find alive/dead Agents by specifying if an agents are alive or not.
+     * Find alive/dead Agents by specifying if agents are alive or not.
      * @param isAlive True if alive Agents should be found, false otherwise.
-     * @return List of alive/dead Agents, empty collection if none has been found.
+     * @return List of alive/dead Agents, empty list if none has been found.
      * @throws ServiceFailureException when problem with database occurs.
      */
     List<Agent> findAgentsByAlive(boolean isAlive) throws ServiceFailureException;
@@ -75,7 +75,7 @@ public interface AgentManager {
     /**
      * Find agents with given special power.
      * @param specialPower string representing specialPower
-     * @return List of agents with given special power, empty collection if none has been found.
+     * @return List of agents with given special power, empty list if none has been found.
      * @throws ServiceFailureException when problem with database occurs.
      * @throws IllegalArgumentException when specialPower is null or empty
      */
@@ -85,7 +85,7 @@ public interface AgentManager {
     /**
      * Find agents of specified rank.
      * @param rank int value of rank.
-     * @return List of agents with given rank, empty collection if none has been found.
+     * @return List of agents with given rank, empty list if none has been found.
      * @throws ServiceFailureException when problem with database occurs.
      * @throws IllegalArgumentException when rank param is less or equal 0.
      */

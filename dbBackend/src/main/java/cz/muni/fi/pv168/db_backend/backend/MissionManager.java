@@ -60,7 +60,7 @@ public interface MissionManager {
 
     /**
      * List all missions from database.
-     * @return List of all missions, empty collection if none has been found.
+     * @return List of all missions, empty list if none has been found.
      * @throws ServiceFailureException when problem with database occurs.
      */
     List<Mission> findAllMissions() throws ServiceFailureException;
@@ -68,7 +68,7 @@ public interface MissionManager {
     /**
      * List all Missions by specifying if a Mission was successful or not.
      * @param isSuccessful True if successful Missions should be found, false otherwise.
-     * @return List of successful/unsuccessful Missions, empty collection if none has been found.
+     * @return List of successful/unsuccessful Missions, empty list if none has been found.
      * @throws ServiceFailureException when problem with database occurs.
      */
     List<Mission> findMissionsBySuccess(boolean isSuccessful) throws ServiceFailureException;
@@ -76,7 +76,7 @@ public interface MissionManager {
     /**
      * List all Missions by specifying if a Mission was successful or not.
      * @param isFinished True if finished Missions should be found, false otherwise.
-     * @return List of finished/unfinished Missions, empty collection if none has been found.
+     * @return List of finished/unfinished Missions, empty list if none has been found.
      * @throws ServiceFailureException when problem with database occurs.
      */
     List<Mission> findMissionsByFinished(boolean isFinished) throws ServiceFailureException;
@@ -84,7 +84,7 @@ public interface MissionManager {
     /**
      * List all Missions with specified minimal agents rank.
      * @param minRank Minimal agents rank of Missions to be found.
-     * @return List of Missions with specified minimal Agent's rank, empty collection if none has been found.
+     * @return List of Missions with specified minimal Agent's rank, empty list if none has been found.
      * @throws ServiceFailureException when problem with database occurs.
      * @throws IllegalArgumentException when minRank is less or equal 0.
      */

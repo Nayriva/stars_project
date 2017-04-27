@@ -1,3 +1,3 @@
-DROP TABLE agents if EXISTS;
-DROP TABLE assignments if EXISTS;
-DROP TABLE missions if EXISTS;
+DROP TABLE agents;
+DROP TABLE assignments;
+DROP TABLE missions;

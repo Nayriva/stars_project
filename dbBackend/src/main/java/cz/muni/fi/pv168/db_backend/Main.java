@@ -12,7 +12,7 @@ import java.util.Properties;
  */
 public class Main {
 
-    public static DataSource createMemoryDB() throws IOException {
+    public static DataSource createDB() throws IOException {
         Properties myconf = new Properties();
         myconf.load(Main.class.getResourceAsStream("db.properties"));
 

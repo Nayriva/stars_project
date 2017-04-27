@@ -3,8 +3,7 @@ CREATE TABLE agents (
     name VARCHAR(255) NOT NULL,
     sp_power VARCHAR(255) NOT NULL,
     alive BOOLEAN NOT NULL,
-    rank INT NOT NULL,
-    on_mission BOOLEAN NOT NULL
+    rank INT NOT NULL
 );
 
 

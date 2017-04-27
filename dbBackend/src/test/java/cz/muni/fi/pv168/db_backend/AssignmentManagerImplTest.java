@@ -143,7 +143,6 @@ public class AssignmentManagerImplTest {
                 .specialPower(AgentManagerImplTest.SP_POWER_IN_DB1)
                 .alive(true)
                 .rank(1)
-                .onMission(false)
                 .build();
 
         existingAgent2 = new AgentBuilder()
@@ -152,7 +151,6 @@ public class AssignmentManagerImplTest {
                 .specialPower(AgentManagerImplTest.SP_POWER_IN_DB2)
                 .alive(true)
                 .rank(2)
-                .onMission(false)
                 .build();
 
         notInDBAgent = new AgentBuilder()
@@ -161,7 +159,6 @@ public class AssignmentManagerImplTest {
                 .specialPower(AgentManagerImplTest.SP_POWER_NOT_IN_DB)
                 .alive(true)
                 .rank(3)
-                .onMission(false)
                 .build();
     }
 
@@ -285,9 +282,8 @@ public class AssignmentManagerImplTest {
     @Test
     public void createAssignmentWithAgentWhoIsOnMission() {
         Agent agent = existingAgent1;
-        agent.setOnMission(true);
-        agentManager.updateAgent(agent);
         Assignment assignment = sampleAssignment().agent(agent.getId()).build();
+        manager.createAssignment(assignment);
 
         expectedException.expect(AssignmentException.class);
         manager.createAssignment(assignment);
@@ -381,7 +377,7 @@ public class AssignmentManagerImplTest {
         Mission mission1 = existingMission1;
         Mission mission2 = existingMission2;
         Assignment a1 = sampleAssignment().mission(mission1.getId()).build();
-        Assignment a2 = sampleAssignment().mission(mission2.getId()).build();
+        Assignment a2 = anotherAssignment().mission(mission2.getId()).build();
         List<Assignment> result;
 
         manager.createAssignment(a1);

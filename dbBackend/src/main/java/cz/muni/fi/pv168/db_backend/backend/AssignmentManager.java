@@ -20,11 +20,11 @@ public interface AssignmentManager {
      * @param assignment to be created.
      * @throws ServiceFailureException when problem with database occurs.
      * @throws EntityValidationException when one or more fields of Assignment are null.
-     * (Mission is null or has invalid field, Agent is null or has invalid field, start is not NOW, end is not null).
+     * (Mission is null or is not in DB, Agent is null or is not in DB, start is not NOW, end is not null).
      * @throws IllegalArgumentException when assignment is null.
      * @throws IllegalEntityException when assignment has already assigned ID.
      * @throws AssignmentException when agent's rank is less than mission's minAgentRank, agent is dead,
-     * mission is marked as finished or successful.
+     * mission is marked as finished or successful, agent is already on a mission.
      */
     void createAssignment(Assignment assignment)
             throws ServiceFailureException, IllegalEntityException,
@@ -35,7 +35,7 @@ public interface AssignmentManager {
      * @param assignment to be updated
      * @throws ServiceFailureException when problem with database occurs.
      * @throws EntityValidationException when one or more fields of Assignment are null.
-     * (Mission is null, Agent is null, start is null)
+     * (Mission is null or is not in DB, Agent is null or is not in DB, start is null)
      * @throws IllegalEntityException when ID is null or assignment is not in DB.
      * @throws IllegalArgumentException when assignment is null.
      */
@@ -46,7 +46,7 @@ public interface AssignmentManager {
      * Delete assignment from database.
      * @param assignment to be deleted
      * @throws ServiceFailureException when problem with database occurs.
-     * @throws IllegalEntityException when ID is null or assignment is nod in DB.
+     * @throws IllegalEntityException when ID is null or assignment is not in DB.
      * @throws IllegalArgumentException when assignment is null.
      */
     void deleteAssignment(Assignment assignment)
@@ -71,9 +71,9 @@ public interface AssignmentManager {
     /**
      * Find Assignment associated with specified Agent.
      * @param agent of whose assignments should be found.
-     * @return Collection of specified agent's assignments, empty collection if no such has been found.
+     * @return Collection of specified agent's assignments, empty list if no such has been found.
      * @throws ServiceFailureException when problem with database occurs.
-     * @throws IllegalEntityException when agent is null or is not in DB.
+     * @throws IllegalEntityException when agent is not in DB.
      * @throws IllegalArgumentException when agent is null.
      */
     List<Assignment> findAssignmentsOfAgent(Long agent)
@@ -82,9 +82,9 @@ public interface AssignmentManager {
     /**
      * Find Assignment associated with specified Mission.
      * @param mission of which assignments should be found.
-     * @return Collection of specified mission's assignments, empty collection if no such has been found.
+     * @return Collection of specified mission's assignments, empty list if no such has been found.
      * @throws ServiceFailureException when problem with database occurs.
-     * @throws IllegalEntityException when mission is null or is not in DB.
+     * @throws IllegalEntityException when mission is not in DB.
      * @throws IllegalArgumentException when mission is null.
      */
     List<Assignment> findAssignmentsOfMission(Long mission)
@@ -92,14 +92,14 @@ public interface AssignmentManager {
 
     /**
      * Find all Assignments where End (date) is greater or equal to actual date.
-     * @return Collection of specified active assignments, empty collection if no such has been found.
+     * @return Collection of active assignments, empty list if no such has been found.
      * @throws ServiceFailureException when problem with database occurs.
      */
     List<Assignment> findActiveAssignments() throws ServiceFailureException;
 
     /**
      * Find all Assignments where end (date) is less than actual date.
-     * @return Collection of specified expired assignments, empty collection if no such has been found.
+     * @return Collection of expired assignments, empty list if no such has been found.
      * @throws ServiceFailureException when problem with database occurs.
      */
     List<Assignment> findEndedAssignments() throws ServiceFailureException;

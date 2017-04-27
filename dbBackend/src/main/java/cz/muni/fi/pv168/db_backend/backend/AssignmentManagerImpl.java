@@ -319,12 +319,8 @@ public class AssignmentManagerImpl implements AssignmentManager{
         if (insert && assignment.getEnd() != null) {
             throw new EntityValidationException("Invalid end field: end is not null when creating assignment!");
         }
-        AgentManager agentManager = new AgentManagerImpl();
-        agentManager.setDataSource(dataSource);
-        MissionManager missionManager = new MissionManagerImpl();
-        missionManager.setDataSource(dataSource);
-        Agent agent = agentManager.findAgentById(assignment.getAgent());
-        Mission mission = missionManager.findMissionById(assignment.getMission());
+        Agent agent = getAgent(assignment);
+        Mission mission = getMission(assignment);
         if (insert && agent == null) {
             throw new IllegalEntityException("Invalid agent field: agent not in DB!");
         }
@@ -340,8 +336,8 @@ public class AssignmentManagerImpl implements AssignmentManager{
         if (insert && ! agent.isAlive()) {
             throw new AssignmentException("Invalid agent field: agent is dead!");
         }
-        if (insert && agent.isOnMission()) {
-            throw new AssignmentException("Invalid agent field: agent already assigned to mission!");
+        if (insert && !validateAgentNotOnMission(agent.getId())) {
+            throw new AssignmentException("Invalid agent field: agent is already on mission!");
         }
         if (insert && agent.getRank() < mission.getMinAgentRank()) {
             throw new AssignmentException(
@@ -353,6 +349,24 @@ public class AssignmentManagerImpl implements AssignmentManager{
         if (!insert && assignment.getEnd() != null && assignment.getEnd().isBefore(LocalDate.now(clock))) {
             throw new EntityValidationException("Cannot update end to past date!");
         }
+    }
+
+    private boolean validateAgentNotOnMission(Long agentId) {
+        List<Assignment> activeOfAgent = findAssignmentsOfAgent(agentId);
+        activeOfAgent.removeIf((assignment) -> assignment.getEnd() != null);
+        return activeOfAgent.isEmpty();
+    }
+
+    private Agent getAgent(Assignment assignment) {
+        AgentManager agentManager = new AgentManagerImpl();
+        agentManager.setDataSource(dataSource);
+        return agentManager.findAgentById(assignment.getAgent());
+    }
+
+    private Mission getMission(Assignment assignment) {
+        MissionManager missionManager = new MissionManagerImpl();
+        missionManager.setDataSource(dataSource);
+        return missionManager.findMissionById(assignment.getMission());
     }
 
     private static Date toSQLDate(LocalDate localDate) {

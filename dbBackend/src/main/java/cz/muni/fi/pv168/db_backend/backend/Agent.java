@@ -2,7 +2,6 @@ package cz.muni.fi.pv168.db_backend.backend;
 
 /**
  * Class represents entity - Agent.
- * Param special power x must satisfy 0 < x < 12
  *
  * Created by nayriva on 7.3.2017.
  */

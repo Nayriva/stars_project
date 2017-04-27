@@ -13,7 +13,6 @@ public class AgentBuilder {
     private String specialPower;
     private boolean alive;
     private int rank;
-    private boolean onMission;
 
     public AgentBuilder id(Long id) {
         this.id = id;
@@ -40,11 +39,6 @@ public class AgentBuilder {
         return this;
     }
 
-    public AgentBuilder onMission(boolean onMission) {
-        this.onMission = onMission;
-        return this;
-    }
-
     public Agent build() {
         Agent agent = new Agent();
         agent.setId(id);
@@ -52,7 +46,6 @@ public class AgentBuilder {
         agent.setSpecialPower(specialPower);
         agent.setAlive(alive);
         agent.setRank(rank);
-        agent.setOnMission(onMission);
         return agent;
     }
 }
