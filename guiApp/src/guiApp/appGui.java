@@ -37,18 +37,27 @@ public class appGui {
     private JButton endAssignmentButton;
     private JButton deleteAssignmentButton;
     private JTable assignmentTable;
+    private JButton listAllAssignmentsButton;
+    private JRadioButton activeRadioButton;
+    private JRadioButton pastRadioButton;
+    private JButton listAssignmentsButton;
     private ButtonGroup agentRadioGroup;
+    private ButtonGroup assignmentRadioGroup;
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
         aliveRadioButton = new JRadioButton("alive");
         aliveRadioButton.setSelected(true);
-
         deadRadioButton = new JRadioButton("dead");
-
         agentRadioGroup = new ButtonGroup();
         agentRadioGroup.add(aliveRadioButton);
         agentRadioGroup.add(deadRadioButton);
+
+        activeRadioButton = new JRadioButton("active");
+        activeRadioButton.setSelected(true);
+        pastRadioButton = new JRadioButton("past");
+        assignmentRadioGroup = new ButtonGroup();
+        assignmentRadioGroup.add(activeRadioButton);
+        assignmentRadioGroup.add(pastRadioButton);
     }
 
     public static void main(String[] args) {
