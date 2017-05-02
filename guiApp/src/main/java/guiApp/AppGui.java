@@ -6,9 +6,10 @@ import cz.muni.fi.pv168.db_backend.common.DBUtils;
 
 import javax.sql.DataSource;
 import javax.swing.*;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.time.Clock;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 
 /**
  * Created by nayriva on 27.4.2017.
@@ -31,8 +32,8 @@ public class AppGui {
     private JSpinner minAgRankSpinner;
     private JTable missionTable;
     //assignment
-    private JButton createAssignmentButton, endAssignmentButton, deleteAssignmentButton, listAllAssignmentsButton,
-            listAssignmentsButton;
+    private JButton createAssignmentButton, editAssignmentButton, endAssignmentButton, deleteAssignmentButton2,
+            listAllAssignmentsButton, listAssignmentsButton;
     private JRadioButton activeRadioButton, pastRadioButton;
     private JTable assignmentTable;
 
@@ -42,16 +43,18 @@ public class AppGui {
     private static MissionManager missionManager;
 
     private void createUIComponents() {
-        aliveRadioButton = new JRadioButton("alive");
+        Locale locale = Locale.getDefault();
+        ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
+        aliveRadioButton = new JRadioButton(rb.getString("aliveRadioButton"));
         aliveRadioButton.setSelected(true);
-        deadRadioButton = new JRadioButton("dead");
+        deadRadioButton = new JRadioButton(rb.getString("deadRadioButton"));
         ButtonGroup agentRadioGroup = new ButtonGroup();
         agentRadioGroup.add(aliveRadioButton);
         agentRadioGroup.add(deadRadioButton);
 
-        activeRadioButton = new JRadioButton("active");
+        activeRadioButton = new JRadioButton(rb.getString("activeRadioButton"));
         activeRadioButton.setSelected(true);
-        pastRadioButton = new JRadioButton("past");
+        pastRadioButton = new JRadioButton(rb.getString("pastRadioButton"));
         ButtonGroup assignmentRadioGroup = new ButtonGroup();
         assignmentRadioGroup.add(activeRadioButton);
         assignmentRadioGroup.add(pastRadioButton);
@@ -93,7 +96,7 @@ public class AppGui {
         assignmentManager = new AssignmentManagerImpl(Clock.systemUTC());
         missionManager = new MissionManagerImpl();
 
-        try {
+        /*try {
             Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
             ds = Main.createDB();
             DBUtils.tryCreateTables(ds, Main.class.getResource("backend/createTables.sql"));
@@ -101,7 +104,7 @@ public class AppGui {
             System.exit(1);
         } catch (IOException | SQLException e) {
             System.exit(2);
-        }
+        }*/
 
         agentManager.setDataSource(ds);
         assignmentManager.setDataSource(ds);
