@@ -3,14 +3,14 @@ package guiApp;
 import javax.swing.*;
 import java.awt.event.*;
 
-public class addAssignmentDialog extends JDialog {
+public class AddAssignmentDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
     private JComboBox missionComboBox;
     private JComboBox comboBox1;
 
-    public addAssignmentDialog() {
+    public AddAssignmentDialog() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -54,7 +54,7 @@ public class addAssignmentDialog extends JDialog {
     }
 
     public static void main(String[] args) {
-        addAssignmentDialog dialog = new addAssignmentDialog();
+        AddAssignmentDialog dialog = new AddAssignmentDialog();
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);

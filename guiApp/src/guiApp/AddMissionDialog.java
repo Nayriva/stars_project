@@ -3,7 +3,7 @@ package guiApp;
 import javax.swing.*;
 import java.awt.event.*;
 
-public class addMissionDialog extends JDialog {
+public class AddMissionDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -12,7 +12,7 @@ public class addMissionDialog extends JDialog {
     private JTextField placeField;
     private JSpinner minAgRankSpinner;
 
-    public addMissionDialog() {
+    public AddMissionDialog() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -56,7 +56,7 @@ public class addMissionDialog extends JDialog {
     }
 
     public static void main(String[] args) {
-        addMissionDialog dialog = new addMissionDialog();
+        AddMissionDialog dialog = new AddMissionDialog();
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);

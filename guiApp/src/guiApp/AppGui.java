@@ -13,7 +13,7 @@ import java.time.Clock;
 /**
  * Created by nayriva on 27.4.2017.
  */
-public class appGui {
+public class AppGui {
     private JPanel mainPanel;
     private JTabbedPane tabbedPane;
     private JSplitPane agentSplitPane, missionSplitPane, assignmentSplitPane;
@@ -79,7 +79,7 @@ public class appGui {
         prepareDataSourceAndDb();
 
         JFrame frame = new JFrame("S.T.A.R.S. Management system");
-        frame.setContentPane(new appGui().mainPanel);
+        frame.setContentPane(new AppGui().mainPanel);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);

@@ -1,6 +1,8 @@
 package cz.muni.fi.pv168.db_backend.backend;
 
 import cz.muni.fi.pv168.db_backend.common.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -22,9 +24,11 @@ public class AssignmentManagerImpl implements AssignmentManager{
     public void setDataSource(DataSource dataSource) {
         this.dataSource = dataSource;
     }
+    private final static Logger logger = LoggerFactory.getLogger(AssignmentManagerImpl.class);
 
     private void checkDataSource() {
         if (dataSource == null) {
+            logger.error("Datasource in assignmentManager not set!");
             throw new IllegalStateException("DataSource is not set");
         }
     }
@@ -38,9 +42,11 @@ public class AssignmentManagerImpl implements AssignmentManager{
             throws ServiceFailureException, IllegalEntityException,
             IllegalArgumentException, EntityValidationException
     {
+        logger.debug("Create assignment {} ...", assignment);
         checkDataSource();
         validate(assignment, true);
         if (assignment.getId() != null) {
+            logger.debug("Error while creating assignment: already assigned ID ... {}", assignment);
             throw new IllegalEntityException("Assignment has already got assigned ID!");
         }
 
@@ -64,11 +70,13 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 conn.commit();
             } catch (SQLException ex) {
                 String errorMsg = "Error when inserting new assignment into DB!";
+                logger.error(errorMsg, ex);
                 conn.rollback();
                 assignment.setStart(null);
                 throw new ServiceFailureException(errorMsg, ex);
             } catch (ServiceFailureException ex) {
                 conn.rollback();
+                logger.error("Service failure", ex);
                 throw ex;
             } finally {
                 conn.setAutoCommit(true);
@@ -76,20 +84,24 @@ public class AssignmentManagerImpl implements AssignmentManager{
 
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
-
+        logger.debug("Create assignment finished {} ...", assignment);
     }
 
     @Override
     public void updateAssignment(Assignment assignment)
             throws ServiceFailureException, EntityValidationException, IllegalEntityException {
 
+        logger.debug("Update assignment {} ...", assignment);
         checkDataSource();
         validate(assignment, false);
         if (assignment.getId() == null) {
+            logger.error("Error while updating assignment: assignment without associated ID ... {}", assignment);
             throw new IllegalEntityException("Assignment hasn't got associated ID!");
         } else if (assignment.getId() < 0) {
+            logger.error("Error while updating assignment: assignmentId < 0 ... {}", assignment);
             throw new IllegalEntityException("Assignment ID must be >= 0!");
         }
         try (Connection conn = dataSource.getConnection()) {
@@ -107,32 +119,38 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 conn.commit();
             } catch (SQLException | IllegalEntityException ex) {
                 String errorMsg = "Error when updating assignment in DB!";
+                logger.error(errorMsg, ex);
                 conn.rollback();
                 throw new ServiceFailureException(errorMsg, ex);
             } catch (ServiceFailureException ex) {
                 conn.rollback();
+                logger.error("Service failure", ex);
                 throw ex;
             } finally {
                 conn.setAutoCommit(true);
             }
-
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
+        logger.debug("Update assignment finished {} ...", assignment);
     }
 
     @Override
     public void deleteAssignment(Assignment assignment)
             throws ServiceFailureException, IllegalEntityException {
 
+        logger.debug("Delete assignment {} ...", assignment);
         checkDataSource();
         if (assignment == null) {
+            logger.error("Error while deleting assignment: assignment is NULL");
             throw new IllegalArgumentException("Assignment is NULL!");
-        }
-        else if (assignment.getId() == null) {
+        } else if (assignment.getId() == null) {
+            logger.error("Error while deleting assignment: assignment without associated ID ... {}", assignment);
             throw new IllegalEntityException("Assignment hasn't got associated ID!");
         } else if (assignment.getId() < 0) {
+            logger.error("Error while deleting assignment: assignmentId < 0 ... {}", assignment);
             throw new IllegalEntityException("Assignment ID must be >= 0!");
         }
 
@@ -148,26 +166,33 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 conn.commit();
             } catch (SQLException | IllegalEntityException ex) {
                 String errorMsg = "Error when deleting assignment from DB!";
+                logger.error(errorMsg, ex);
                 conn.rollback();
                 throw new ServiceFailureException(errorMsg, ex);
             } catch (ServiceFailureException ex) {
                 conn.rollback();
+                logger.error("Service failure", ex);
                 throw ex;
             } finally {
                 conn.setAutoCommit(true);
             }
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
+        logger.debug("Delete assignment finished {} ...", assignment);
     }
 
     @Override
     public Assignment findAssignmentById(Long id) throws ServiceFailureException {
+        logger.debug("Find assignment by id {} ...", id);
         checkDataSource();
         if (id == null) {
+            logger.error("ID is NULL");
             throw new IllegalArgumentException("ID is null!");
         } else if (id < 0) {
+            logger.error("ID < 0");
             throw new IllegalArgumentException("ID must be >= 0");
         }
 
@@ -178,17 +203,21 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 result = executeQueryForSingleAssignment(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when trying to find assignment by ID!";
+                logger.error(errorMsg, ex);
                 throw new ServiceFailureException(errorMsg, ex);
             }
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
+        logger.debug("Find assignment by id finished {} ...", result);
         return result;
     }
 
     @Override
     public List<Assignment> findAllAssignments() throws ServiceFailureException {
+        logger.debug("Find all assignments ...");
         checkDataSource();
         List<Assignment> result;
         try (Connection conn = dataSource.getConnection()) {
@@ -196,12 +225,15 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 result = executeQueryForMoreAssignments(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when listing all assignments from DB!";
+                logger.error(errorMsg, ex);
                 throw new ServiceFailureException(errorMsg, ex);
             }
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
+        logger.debug("Find all assignments finished ...");
         return result;
     }
 
@@ -209,10 +241,13 @@ public class AssignmentManagerImpl implements AssignmentManager{
     public List<Assignment> findAssignmentsOfAgent(Long agent)
             throws ServiceFailureException, IllegalEntityException {
 
+        logger.debug("Find all assignments of agent {} ...", agent);
         checkDataSource();
         if (agent == null) {
+            logger.error("Error: agent is NULL");
             throw new IllegalArgumentException("Agent is null!");
         } else if (agent < 0) {
+            logger.error("Error: agentId < 0");
             throw new IllegalEntityException("Agent's ID must be >= 0!");
         }
 
@@ -225,12 +260,15 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 result = executeQueryForMoreAssignments(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when listing all assignments of agent " + agent + "!";
+                logger.error(errorMsg, ex);
                 throw new ServiceFailureException(errorMsg, ex);
             }
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
+        logger.debug("Find all assignments of agent {} finished ...", agent);
         return result;
     }
 
@@ -238,10 +276,13 @@ public class AssignmentManagerImpl implements AssignmentManager{
     public List<Assignment> findAssignmentsOfMission(Long mission)
             throws ServiceFailureException, IllegalEntityException {
 
+        logger.debug("Find assignments of mission {} ...", mission);
         checkDataSource();
         if (mission == null) {
+            logger.error("Error: mission is NULL");
             throw new IllegalArgumentException("Mission is null!");
         } else if (mission < 0) {
+            logger.error("Error: missionId < 0");
             throw new IllegalEntityException("Mission's ID must be >= 0!");
         }
 
@@ -254,17 +295,21 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 result = executeQueryForMoreAssignments(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when listing all assignments of " + mission + "!";
+                logger.error(errorMsg, ex);
                 throw new ServiceFailureException(errorMsg, ex);
             }
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
+        logger.debug("Find assignments of mission {} finished ...", mission);
         return result;
     }
 
     @Override
     public List<Assignment> findActiveAssignments() throws ServiceFailureException {
+        logger.debug("Find active assignments ...");
         checkDataSource();
         List<Assignment> result;
         try (Connection conn = dataSource.getConnection()) {
@@ -274,17 +319,21 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 result = executeQueryForMoreAssignments(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when listing all active assignments!";
+                logger.error(errorMsg, ex);
                 throw new ServiceFailureException(errorMsg, ex);
             }
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
+        logger.debug("Find active assignments finished ...");
         return result;
     }
 
     @Override
     public List<Assignment> findEndedAssignments() throws ServiceFailureException {
+        logger.debug("Find ended assignments ...");
         checkDataSource();
         List<Assignment> result;
         try (Connection conn = dataSource.getConnection()) {
@@ -294,59 +343,82 @@ public class AssignmentManagerImpl implements AssignmentManager{
                 result = executeQueryForMoreAssignments(stm);
             } catch (SQLException ex ) {
                 String errorMsg = "Error when listing all past assignments!";
+                logger.error(errorMsg, ex);
                 throw new ServiceFailureException(errorMsg, ex);
             }
         } catch (SQLException ex) {
             String errorMsg = "Database connection failure!";
+            logger.error(errorMsg, ex);
             throw new ServiceFailureException(errorMsg, ex);
         }
+        logger.debug("Find ended assignments finished");
         return result;
     }
 
     private void validate(Assignment assignment, boolean insert) {
         if (assignment == null) {
+            logger.error("Validation error: assignment is NULL");
             throw new IllegalArgumentException("Assignment is null!");
         }
         if (assignment.getStart() == null) {
+            logger.error("Validation error: start field is null");
             throw new EntityValidationException("Invalid start field: start is null!");
         }
         if (assignment.getMission() == null || assignment.getMission() < 0) {
+            logger.error("Validation error: invalid mission field - id of mission");
             throw new EntityValidationException("Invalid mission field: id of mission!");
         }
         if (assignment.getAgent() == null || assignment.getAgent() < 0) {
+            logger.error("Validation error: invalid mission field - id of agent");
             throw new EntityValidationException("Invalid agent field: id of agent!");
         }
         if (insert && assignment.getEnd() != null) {
+            logger.error("Validation error: cannot create assignment with end date set");
             throw new EntityValidationException("Invalid end field: end is not null when creating assignment!");
         }
         Agent agent = getAgent(assignment);
         Mission mission = getMission(assignment);
         if (insert && agent == null) {
+            logger.error("Validation error: cannot create assignment - invalid agent field " +
+                    "- agent not in DB");
             throw new IllegalEntityException("Invalid agent field: agent not in DB!");
         }
         if (insert && mission == null) {
+            logger.error("Validation error: cannot create assignment - invalid mission field " +
+                    "- mission not in DB");
             throw new IllegalEntityException("Invalid mission field: mission not in DB!");
         }
         if (insert && mission.isSuccessful()) {
+            logger.error("Validation error: cannot create assignment - invalid mission field " +
+                    "- mission already marked as successful");
             throw new AssignmentException("Invalid mission field: mission already marked as successful!");
         }
         if (insert &&  mission.isFinished()) {
+            logger.error("Validation error: cannot create assignment - invalid mission field - " +
+                    "mission already marked as finished");
             throw new AssignmentException("Invalid mission field: mission already marked as finished!");
         }
         if (insert && ! agent.isAlive()) {
+            logger.error("Validation error: cannot create assignment - invalid agent field - agent is dead");
             throw new AssignmentException("Invalid agent field: agent is dead!");
         }
         if (insert && !validateAgentNotOnMission(agent.getId())) {
+            logger.error("Validation error: cannot create assignment - invalid agent field " +
+                    "- agent already assigned to a mission");
             throw new AssignmentException("Invalid agent field: agent is already on mission!");
         }
         if (insert && agent.getRank() < mission.getMinAgentRank()) {
+            logger.error("Validation error: cannot create assignment " +
+                    "- agent rank is not high enough for this mission");
             throw new AssignmentException(
                     "Invalid assignment: agent's rank is not high enough for this mission!");
         }
         if (insert && assignment.getStart().isBefore(LocalDate.now(clock))) {
+            logger.error("Validation error: cannot create past assignment");
             throw new EntityValidationException("Cannot create past assignment");
         }
         if (!insert && assignment.getEnd() != null && assignment.getEnd().isBefore(LocalDate.now(clock))) {
+            logger.error("Validation error: cannot update end to past date");
             throw new EntityValidationException("Cannot update end to past date!");
         }
     }
@@ -396,10 +468,12 @@ public class AssignmentManagerImpl implements AssignmentManager{
     private Assignment executeQueryForSingleAssignment(PreparedStatement stm)
             throws SQLException, ServiceFailureException
     {
+        logger.debug("Execute query for single assignment ...");
         ResultSet rs = stm.executeQuery();
         if (rs.next()) {
             Assignment result = rowToAssignment(rs);
             if (rs.next()) {
+                logger.error("Error: multiple assignments with same ID found");
                 throw new ServiceFailureException("Internal integrity error: more Assignments with the same ID found!");
             }
             return result;
@@ -411,6 +485,7 @@ public class AssignmentManagerImpl implements AssignmentManager{
     private List<Assignment> executeQueryForMoreAssignments(PreparedStatement stm)
             throws SQLException, ServiceFailureException
     {
+        logger.debug("Execute query for more assignments ...");
         ResultSet rs = stm.executeQuery();
         List<Assignment> resultList = new ArrayList<>();
         while (rs.next()) {

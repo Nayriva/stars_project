@@ -3,7 +3,7 @@ package guiApp;
 import javax.swing.*;
 import java.awt.event.*;
 
-public class addAgentDialog extends JDialog {
+public class AddAgentDialog extends JDialog {
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -11,7 +11,7 @@ public class addAgentDialog extends JDialog {
     private JTextField specialPowerField;
     private JSpinner rankSpinner;
 
-    public addAgentDialog() {
+    public AddAgentDialog() {
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
@@ -55,7 +55,7 @@ public class addAgentDialog extends JDialog {
     }
 
     public static void main(String[] args) {
-        addAgentDialog dialog = new addAgentDialog();
+        AddAgentDialog dialog = new AddAgentDialog();
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);
