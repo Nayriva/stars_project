@@ -361,7 +361,7 @@
                               <text value="Min ag. rank:"/>
                             </properties>
                           </component>
-                          <component id="85304" class="javax.swing.JSpinner" binding="spinner2" default-binding="true">
+                          <component id="85304" class="javax.swing.JSpinner" binding="minAgRankSpinner">
                             <constraints>
                               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                             </constraints>
