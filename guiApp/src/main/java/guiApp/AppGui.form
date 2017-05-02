@@ -54,7 +54,7 @@
                         </constraints>
                         <properties>
                           <text resource-bundle="guiApp/localization" key="addAgentButton"/>
-                          <toolTipText value="Create new agent entry"/>
+                          <toolTipText value=""/>
                         </properties>
                       </component>
                       <component id="4efe7" class="javax.swing.JButton" binding="editAgentButton" default-binding="true">
@@ -97,6 +97,7 @@
                               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties>
+                              <labelFor value="f9ff1"/>
                               <text resource-bundle="guiApp/localization" key="aliveLabel"/>
                             </properties>
                           </component>
@@ -233,9 +234,11 @@
                         <properties/>
                         <border type="none"/>
                         <children>
-                          <component id="3e377" class="javax.swing.JTable" binding="agentTable">
+                          <component id="3e377" class="javax.swing.JTable" binding="agentTable" custom-create="true">
                             <constraints/>
-                            <properties/>
+                            <properties>
+                              <fillsViewportHeight value="true"/>
+                            </properties>
                           </component>
                         </children>
                       </scrollpane>
@@ -407,7 +410,7 @@
                         <properties/>
                         <border type="none"/>
                         <children>
-                          <component id="7ed33" class="javax.swing.JTable" binding="missionTable">
+                          <component id="7ed33" class="javax.swing.JTable" binding="missionTable" custom-create="true">
                             <constraints/>
                             <properties/>
                           </component>
@@ -452,10 +455,10 @@
                           <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text resource-bundle="guiApp/localization" key="CreateAssignmentButton"/>
+                          <text resource-bundle="guiApp/localization" key="createAssignmentButton"/>
                         </properties>
                       </component>
-                      <component id="f945a" class="javax.swing.JButton" binding="deleteAssignmentButton2" default-binding="true">
+                      <component id="f945a" class="javax.swing.JButton" binding="deleteAssignmentButton" default-binding="true">
                         <constraints>
                           <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
@@ -533,7 +536,7 @@
                         <properties/>
                         <border type="none"/>
                         <children>
-                          <component id="6f629" class="javax.swing.JTable" binding="assignmentTable">
+                          <component id="6f629" class="javax.swing.JTable" binding="assignmentTable" custom-create="true">
                             <constraints/>
                             <properties/>
                           </component>
