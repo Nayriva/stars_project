@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Table model for AgentTable.
  * Created by nayriva on 2.5.2017.
  */
 public class AgentTableModel extends AbstractTableModel {
@@ -97,6 +98,6 @@ public class AgentTableModel extends AbstractTableModel {
     public void addData(Agent agent) {
         data.add(agent);
         int lastRow = data.size() - 1;
-        AppGui.getAgentTableModel().fireTableRowsInserted(lastRow, lastRow);
+        fireTableRowsInserted(lastRow, lastRow);
     }
 }

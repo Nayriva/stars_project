@@ -1,6 +1,7 @@
 package guiApp;
 
 import cz.muni.fi.pv168.db_backend.backend.Agent;
+import cz.muni.fi.pv168.db_backend.backend.Assignment;
 import cz.muni.fi.pv168.db_backend.common.AgentBuilder;
 import cz.muni.fi.pv168.db_backend.common.EntityValidationException;
 import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
@@ -9,17 +10,16 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.List;
 
 public class EditAgentDialog extends JDialog {
     private final static Logger logger = LoggerFactory.getLogger(EditAgentDialog.class);
 
     private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
-    private JTextField nameField;
-    private JTextField spPowerField;
+    private JButton buttonOK, buttonCancel;
+    private JTextField nameField, spPowerField;
     private JSpinner rankSpinner;
     private JCheckBox aliveCheckBox;
 
@@ -70,38 +70,57 @@ public class EditAgentDialog extends JDialog {
     private void onOK() {
         if (nameField.getText() == null || nameField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogNameWarning"),
-                    "Error", JOptionPane.WARNING_MESSAGE);
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
             return;
         } else if (spPowerField.getText() == null || spPowerField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogSpPowerWarning"),
-                    "Error", JOptionPane.WARNING_MESSAGE);
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
             return;
-        } else if (rankSpinner.getValue() == null || ((Integer) rankSpinner.getValue()) < 1) {
+        } else if (rankSpinner.getValue() == null || ((int) rankSpinner.getValue()) < 1) {
             JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogRankWarning"),
-                    "Error", JOptionPane.WARNING_MESSAGE);
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         String name = nameField.getText();
         String specialPower = spPowerField.getText();
-        int rank = (Integer) rankSpinner.getValue();
-        Thread editAgent = new Thread(() -> {
+        int rank = (int) rankSpinner.getValue();
+
+        if (! name.equals(agent.getName()) || ! specialPower.equals(agent.getSpecialPower()) || rank != agent.getRank()
+                || aliveCheckBox.isSelected() != agent.isAlive()) {
+            boolean oldAlive = agent.isAlive();
             agent = new AgentBuilder().id(agentId).name(name).specialPower(specialPower)
                     .alive(aliveCheckBox.isSelected()).rank(rank).build();
-            try {
-                AppGui.getAgentManager().updateAgent(agent);
-            } catch (ServiceFailureException ex) {
-                logger.error("Cannot edit agent, DB problem - agent: {}", agent, ex.getMessage());
-                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogFailedWarning"),
-                        "Error", JOptionPane.WARNING_MESSAGE);
-            } catch (EntityValidationException ex) {
-                logger.error("Cannot edit agent, validation problem - agent: {}", agent, ex.getMessage());
-                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogFailedWarning"),
-                        "Error", JOptionPane.WARNING_MESSAGE);
-            }
+            Thread editAgent = new Thread(() -> {
+                synchronized (AppGui.LOCK) {
+                    updateInDB(oldAlive);
+                }
+            });
+            editAgent.start();
             AppGui.getAgentTableModel().editData(agentIndex, agent);
-        });
-        editAgent.start();
-        dispose();
+            dispose();
+        }
+    }
+
+    private void updateInDB(boolean oldAlive) {
+        try {
+            AppGui.getAgentManager().updateAgent(agent);
+            if (oldAlive != agent.isAlive()) {
+                List<Assignment> ofAgent = AppGui.getAssignmentManager().findAssignmentsOfAgent(agent.getId());
+                ofAgent.removeIf((assignment -> assignment.getEnd() != null));
+                for (Assignment a: ofAgent) {
+                    a.setEnd(LocalDate.now(Clock.systemUTC()));
+                    AppGui.getAssignmentManager().updateAssignment(a);
+                }
+            }
+        } catch (ServiceFailureException ex) {
+            logger.error("Cannot edit agent, DB problem - agent: {}", agent, ex.getMessage());
+            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("operationFailedWarning"),
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
+        } catch (EntityValidationException ex) {
+            logger.error("Cannot edit agent, validation problem - agent: {}", agent, ex.getMessage());
+            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("operationFailedWarning"),
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     private void setValues() {

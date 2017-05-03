@@ -1,5 +1,6 @@
 package guiApp.tableModels;
 
+import cz.muni.fi.pv168.db_backend.backend.Agent;
 import cz.muni.fi.pv168.db_backend.backend.Mission;
 import guiApp.AppGui;
 
@@ -82,8 +83,26 @@ public class MissionTableModel extends AbstractTableModel {
         }
     }
 
-    public Mission getMission(int index) {
-        return data.get(index);
+    public void editData(int index, Mission mission) {
+        data.set(index, mission);
+        int lastRow = data.size() - 1;
+        fireTableRowsUpdated(lastRow, lastRow);
+    }
+
+    public Long getMissionId(int index) {
+        return data.get(index).getId();
+    }
+
+    public void deleteData(int index) {
+        data.remove(index);
+        int lastRow = data.size() - 1;
+        fireTableRowsDeleted(lastRow, lastRow);
+    }
+
+    public void deleteAllData() {
+        data.clear();
+        int lastRow = data.size() - 1;
+        fireTableRowsDeleted(lastRow, lastRow);
     }
 
     public void addData(Mission mission) {

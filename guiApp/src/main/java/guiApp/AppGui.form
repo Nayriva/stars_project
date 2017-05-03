@@ -254,7 +254,7 @@
                   </grid>
                 </constraints>
                 <properties>
-                  <dividerLocation value="200"/>
+                  <dividerLocation value="209"/>
                 </properties>
                 <border type="none"/>
                 <children>
@@ -310,22 +310,23 @@
                         <properties/>
                         <border type="none"/>
                         <children>
-                          <component id="15ed1" class="javax.swing.JCheckBox" binding="successfulCheckBox" default-binding="true">
+                          <component id="3ffdf" class="javax.swing.JCheckBox" binding="successfulCheckBox" default-binding="true">
                             <constraints>
                               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties>
+                              <selected value="true"/>
                               <text resource-bundle="guiApp/localization" key="successfulCheckBox"/>
                               <toolTipText value="Successful value of mission"/>
                             </properties>
                           </component>
-                          <component id="dbc5c" class="javax.swing.JCheckBox" binding="finishedCheckBox" default-binding="true">
+                          <component id="f26b5" class="javax.swing.JCheckBox" binding="finishedCheckBox" default-binding="true">
                             <constraints>
                               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties>
                               <text resource-bundle="guiApp/localization" key="finishedCheckBox"/>
-                              <toolTipText value="Finished value of mission"/>
+                              <toolTipText value=""/>
                             </properties>
                           </component>
                         </children>
