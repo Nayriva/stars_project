@@ -95,7 +95,9 @@
                 <preferred-size width="150" height="-1"/>
               </grid>
             </constraints>
-            <properties/>
+            <properties>
+              <text value=""/>
+            </properties>
           </component>
           <component id="822b2" class="javax.swing.JTextField" binding="spPowerField">
             <constraints>
@@ -105,31 +107,23 @@
             </constraints>
             <properties/>
           </component>
-          <component id="efa5f" class="javax.swing.JSpinner" binding="spinner1" default-binding="true">
+          <component id="efa5f" class="javax.swing.JSpinner" binding="rankSpinner">
             <constraints>
               <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties/>
-          </component>
-          <component id="22fff" class="javax.swing.JRadioButton" binding="deadRadioButton" custom-create="true" default-binding="true">
-            <constraints>
-              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text resource-bundle="guiApp/localization" key="editAgentDeadRadioButton"/>
-            </properties>
           </component>
           <hspacer id="a43ea">
             <constraints>
               <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
-          <component id="10284" class="javax.swing.JRadioButton" binding="aliveRadioButton" custom-create="true" default-binding="true">
+          <component id="1dfef" class="javax.swing.JCheckBox" binding="aliveCheckBox" default-binding="true">
             <constraints>
               <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="guiApp/localization" key="editAgentAliveRadioButton"/>
+              <text resource-bundle="guiApp/localization" key="editAgentAliveCheckBox"/>
             </properties>
           </component>
         </children>

@@ -84,7 +84,7 @@
                           <toolTipText value="List all agents"/>
                         </properties>
                       </component>
-                      <grid id="618df" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                      <grid id="618df" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                         <margin top="0" left="0" bottom="0" right="0"/>
                         <constraints>
                           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -101,30 +101,21 @@
                               <text resource-bundle="guiApp/localization" key="aliveLabel"/>
                             </properties>
                           </component>
-                          <component id="7160a" class="javax.swing.JRadioButton" binding="aliveRadioButton" custom-create="true" default-binding="true">
-                            <constraints>
-                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties>
-                              <selected value="true"/>
-                              <text resource-bundle="guiApp/localization" key="aliveRadioButton"/>
-                            </properties>
-                          </component>
-                          <component id="d3821" class="javax.swing.JRadioButton" binding="deadRadioButton" custom-create="true" default-binding="true">
-                            <constraints>
-                              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                            </constraints>
-                            <properties>
-                              <text resource-bundle="guiApp/localization" key="deadRadioButton"/>
-                            </properties>
-                          </component>
                           <component id="b3b5d" class="javax.swing.JButton" binding="listAliveAgentsButton">
                             <constraints>
-                              <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                              <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                             </constraints>
                             <properties>
                               <text resource-bundle="guiApp/localization" key="listAgentsButton"/>
                               <toolTipText value="Find agents with specified alive value"/>
+                            </properties>
+                          </component>
+                          <component id="e9815" class="javax.swing.JCheckBox" binding="aliveCheckBox" default-binding="true">
+                            <constraints>
+                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <text resource-bundle="guiApp/localization" key="aliveCheckBox"/>
                             </properties>
                           </component>
                         </children>
@@ -442,7 +433,7 @@
                 </properties>
                 <border type="none"/>
                 <children>
-                  <grid id="51060" layout-manager="GridLayoutManager" row-count="8" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="51060" layout-manager="GridLayoutManager" row-count="8" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <splitpane position="left"/>
@@ -452,7 +443,7 @@
                     <children>
                       <component id="118be" class="javax.swing.JButton" binding="createAssignmentButton" default-binding="true">
                         <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="guiApp/localization" key="createAssignmentButton"/>
@@ -460,7 +451,7 @@
                       </component>
                       <component id="f945a" class="javax.swing.JButton" binding="deleteAssignmentButton" default-binding="true">
                         <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="guiApp/localization" key="deleteAssignmentButton"/>
@@ -468,7 +459,7 @@
                       </component>
                       <component id="6eeda" class="javax.swing.JButton" binding="endAssignmentButton" default-binding="true">
                         <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="guiApp/localization" key="endAssignmentButton"/>
@@ -476,36 +467,20 @@
                       </component>
                       <vspacer id="f1796">
                         <constraints>
-                          <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                         </constraints>
                       </vspacer>
                       <component id="370e1" class="javax.swing.JButton" binding="listAllAssignmentsButton" default-binding="true">
                         <constraints>
-                          <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="guiApp/localization" key="listAllAssignmentsButton"/>
                         </properties>
                       </component>
-                      <component id="2b12e" class="javax.swing.JRadioButton" binding="activeRadioButton" custom-create="true" default-binding="true">
-                        <constraints>
-                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text resource-bundle="guiApp/localization" key="activeRadioButton"/>
-                        </properties>
-                      </component>
-                      <component id="b2868" class="javax.swing.JRadioButton" binding="pastRadioButton" custom-create="true" default-binding="true">
-                        <constraints>
-                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                        </constraints>
-                        <properties>
-                          <text resource-bundle="guiApp/localization" key="pastRadioButton"/>
-                        </properties>
-                      </component>
                       <component id="f116b" class="javax.swing.JButton" binding="listAssignmentsButton" default-binding="true">
                         <constraints>
-                          <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="guiApp/localization" key="listAssignmentsButton"/>
@@ -513,10 +488,18 @@
                       </component>
                       <component id="f5091" class="javax.swing.JButton" binding="editAssignmentButton" default-binding="true">
                         <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="guiApp/localization" key="editAssignmentButton"/>
+                        </properties>
+                      </component>
+                      <component id="c5965" class="javax.swing.JCheckBox" binding="activeCheckBox" default-binding="true">
+                        <constraints>
+                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="guiApp/localization" key="activeCheckBox"/>
                         </properties>
                       </component>
                     </children>

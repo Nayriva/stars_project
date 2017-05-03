@@ -16,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Clock;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -52,6 +53,8 @@ public class AppGui {
             listAllAssignmentsButton, listAssignmentsButton;
     private JRadioButton activeRadioButton, pastRadioButton;
     private JTable assignmentTable;
+    private JCheckBox aliveCheckBox;
+    private JCheckBox activeCheckBox;
 
     private static DataSource ds;
     private static AgentManager agentManager;
@@ -59,6 +62,9 @@ public class AppGui {
     private static MissionManager missionManager;
     private static Locale locale;
     private static ResourceBundle rb;
+    private static AgentTableModel agentTableModel;
+    private static AssignmentTableModel assignmentTableModel;
+    private static MissionTableModel missionTableModel;
 
     public AppGui() {
         addAgentButton.addActionListener((ActionEvent e) -> {
@@ -70,15 +76,19 @@ public class AppGui {
         });
 
         editAgentButton.addActionListener((ActionEvent e) -> {
-            EditAgentDialog editAgentDialog = new EditAgentDialog();
+            Long agentToEditId = agentTableModel.getAgentId(
+                    agentTable.convertColumnIndexToModel(agentTable.getSelectedRow()));
+            EditAgentDialog editAgentDialog = new EditAgentDialog(agentToEditId,
+                    agentTable.convertColumnIndexToModel(agentTable.getSelectedRow()) );
             editAgentDialog.setTitle(AppGui.getRb().getString("editAgentDialogTitle"));
             editAgentDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
             editAgentDialog.pack();
             editAgentDialog.setVisible(true);
+            agentTableModel.getAgentId(
+                    agentTable.convertColumnIndexToModel(agentTable.getSelectedRow()));
         });
 
         deleteAgentButton.addActionListener((ActionEvent e) -> {
-            AgentTableModel agentTableModel = (AgentTableModel) agentTable.getModel();
             Long agentToDeleteId = agentTableModel.getAgentId(
                     agentTable.convertColumnIndexToModel(agentTable.getSelectedRow()));
             agentTableModel.deleteData(agentTable.getSelectedRow());
@@ -90,50 +100,29 @@ public class AppGui {
         });
 
         listAllAgentsButton.addActionListener((ActionEvent e) -> {
-            List<Agent> agents;
-            ExecutorService es = Executors.newSingleThreadExecutor();
-            Future<List<Agent>> result = es.submit(new Callable<List<Agent>>() {
-                public List<Agent> call() throws Exception {
-                    try {
-                        return agentManager.findAllAgents();
-                    } catch (ServiceFailureException ex) {
-                        logger.error("Service failure", ex);
-                        return null;
-                    }
-                }
-            });
+            callAgentFind(new Object[] { "findAllAgents" });
+        });
 
-            try {
-                agents = result.get();
-            } catch (Exception ex) {
-                return;
-            }
-            es.shutdown();
-            AgentTableModel agentTableModel = (AgentTableModel) agentTable.getModel();
-            for (Agent a : agents) {
-                agentTableModel.addData(a);
-            }
+        listAliveAgentsButton.addActionListener((ActionEvent e) -> {
+            callAgentFind(new Object[] { "findAgentsByAlive", aliveCheckBox.isSelected() });
+        });
+
+        listSpPowAgentsButton.addActionListener((ActionEvent e) -> {
+            callAgentFind(new Object[] { "findAgentsBySpecialPower", spPowerField.getText() });
+        });
+
+        listRankButton.addActionListener((ActionEvent e) -> {
+            callAgentFind(new Object[] { "findAgentsByRank", rankSpinner.getValue()});
         });
     }
 
     private void createUIComponents() {
-        aliveRadioButton = new JRadioButton(rb.getString("aliveRadioButton"));
-        aliveRadioButton.setSelected(true);
-        deadRadioButton = new JRadioButton(rb.getString("deadRadioButton"));
-        ButtonGroup agentRadioGroup = new ButtonGroup();
-        agentRadioGroup.add(aliveRadioButton);
-        agentRadioGroup.add(deadRadioButton);
-
-        activeRadioButton = new JRadioButton(rb.getString("activeRadioButton"));
-        activeRadioButton.setSelected(true);
-        pastRadioButton = new JRadioButton(rb.getString("pastRadioButton"));
-        ButtonGroup assignmentRadioGroup = new ButtonGroup();
-        assignmentRadioGroup.add(activeRadioButton);
-        assignmentRadioGroup.add(pastRadioButton);
-
         agentTable = new JTable(new AgentTableModel());
+        agentTableModel = (AgentTableModel) agentTable.getModel();
         assignmentTable = new JTable(new AssignmentTableModel());
+        assignmentTableModel = (AssignmentTableModel) assignmentTable.getModel();
         missionTable = new JTable(new MissionTableModel());
+        missionTableModel = (MissionTableModel) missionTable.getModel();
     }
 
     public static AgentManager getAgentManager() {
@@ -150,6 +139,18 @@ public class AppGui {
 
     public static ResourceBundle getRb() {
         return rb;
+    }
+
+    public static AgentTableModel getAgentTableModel() {
+        return agentTableModel;
+    }
+
+    public static AssignmentTableModel getAssignmentTableModel() {
+        return assignmentTableModel;
+    }
+
+    public static MissionTableModel getMissionTableModel() {
+        return missionTableModel;
     }
 
     public static void main(String[] args) {
@@ -192,5 +193,40 @@ public class AppGui {
         agentManager.setDataSource(ds);
         assignmentManager.setDataSource(ds);
         missionManager.setDataSource(ds);
+    }
+
+    private void callAgentFind(Object[] args ) {
+        List<Agent> agents = new ArrayList<>();
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        Future<List<Agent>> result = es.submit(new Callable<List<Agent>>() {
+            public List<Agent> call() throws Exception {
+                try {
+                    switch (args[0].toString()) {
+                        case "findAllAgents":
+                            return agentManager.findAllAgents();
+                        case "findAgentsBySpecialPower":
+                            return agentManager.findAgentsBySpecialPower((String) args[1]);
+                        case "findAgentsByAlive":
+                            return agentManager.findAgentsByAlive((boolean) args[1]);
+                        case "findAgentsByRank":
+                            return agentManager.findAgentsByRank((int) args[1]);
+                        default:
+                            throw new IllegalArgumentException("Cannot parse operation");
+                    }
+                } catch (ServiceFailureException ex) {
+                    logger.error("Service failure", ex);
+                    return null;
+                }
+            }
+        });
+
+        try {
+            agents = result.get();
+        } catch (Exception ex) { /* left blank intentionally */ }
+        es.shutdown();
+        agentTableModel.deleteAllData();
+        for (Agent a : agents) {
+            agentTableModel.addData(a);
+        }
     }
 }

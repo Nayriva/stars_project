@@ -1,9 +1,19 @@
 package guiApp;
 
+import cz.muni.fi.pv168.db_backend.backend.Agent;
+import cz.muni.fi.pv168.db_backend.common.AgentBuilder;
+import cz.muni.fi.pv168.db_backend.common.EntityValidationException;
+import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.*;
 import java.awt.event.*;
 
 public class AddAgentDialog extends JDialog {
+    private final static Logger logger = LoggerFactory.getLogger(AddAgentDialog.class);
+
     private JPanel contentPane;
     private JButton buttonOK;
     private JButton buttonCancel;
@@ -45,7 +55,31 @@ public class AddAgentDialog extends JDialog {
     }
 
     private void onOK() {
-        // add your code here
+        if (nameField.getText() == null || nameField.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogNameWarning"),
+                    "Error", JOptionPane.WARNING_MESSAGE);
+        } else if (specialPowerField.getText() == null || specialPowerField.getText().isEmpty()) {
+            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogSpPowerWarning"),
+                    "Error", JOptionPane.WARNING_MESSAGE);
+        } else if (rankSpinner.getValue() == null) {
+            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogRankWarning"),
+                    "Error", JOptionPane.WARNING_MESSAGE);
+        }
+        String name = nameField.getText();
+        String specialPower = specialPowerField.getText();
+        int rank = (Integer) rankSpinner.getValue();
+        Thread createAgent = new Thread(() -> {
+            Agent agent = new AgentBuilder().name(name).specialPower(specialPower).alive(true).rank(rank).build();
+            try {
+                AppGui.getAgentManager().createAgent(agent);
+            } catch (ServiceFailureException ex) {
+                logger.error("Cannot add agent into DB, DB problem - agent: {}", agent, ex.getMessage());
+            } catch (EntityValidationException ex) {
+                logger.error("Cannot add agent into DB, validation problem - agent: {}", agent, ex.getMessage());
+            }
+            AppGui.getAgentTableModel().addData(agent);
+        });
+        createAgent.start();
         dispose();
     }
 
@@ -56,6 +90,7 @@ public class AddAgentDialog extends JDialog {
 
     public static void main(String[] args) {
         AddAgentDialog dialog = new AddAgentDialog();
+        dialog.setTitle(AppGui.getRb().getString("addAgentDialogTitle"));
         dialog.pack();
         dialog.setVisible(true);
         System.exit(0);

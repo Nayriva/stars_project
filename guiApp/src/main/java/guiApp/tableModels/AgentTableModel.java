@@ -72,6 +72,12 @@ public class AgentTableModel extends AbstractTableModel {
         }
     }
 
+    public void editData(int index, Agent agent) {
+        data.set(index, agent);
+        int lastRow = data.size() - 1;
+        AppGui.getAgentTableModel().fireTableRowsUpdated(lastRow, lastRow);
+    }
+
     public Long getAgentId(int index) {
         return data.get(index).getId();
     }
@@ -82,9 +88,15 @@ public class AgentTableModel extends AbstractTableModel {
         fireTableRowsDeleted(lastRow, lastRow);
     }
 
+    public void deleteAllData() {
+        data.clear();
+        int lastRow = data.size() - 1;
+        fireTableRowsDeleted(lastRow, lastRow);
+    }
+
     public void addData(Agent agent) {
         data.add(agent);
         int lastRow = data.size() - 1;
-        fireTableRowsInserted(lastRow, lastRow);
+        AppGui.getAgentTableModel().fireTableRowsInserted(lastRow, lastRow);
     }
 }
