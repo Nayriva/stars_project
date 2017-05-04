@@ -3,7 +3,6 @@ package guiApp;
 import cz.muni.fi.pv168.db_backend.backend.Agent;
 import cz.muni.fi.pv168.db_backend.backend.Assignment;
 import cz.muni.fi.pv168.db_backend.common.AgentBuilder;
-import cz.muni.fi.pv168.db_backend.common.EntityValidationException;
 import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,7 @@ import java.awt.event.*;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class EditAgentDialog extends JDialog {
     private final static Logger logger = LoggerFactory.getLogger(EditAgentDialog.class);
@@ -26,32 +26,34 @@ public class EditAgentDialog extends JDialog {
     private Long agentId;
     private int agentIndex;
     private Agent agent;
+    private boolean oldAlive;
 
     public EditAgentDialog(Long agentId, int agentIndex) {
         this.agentId = agentId;
         this.agentIndex = agentIndex;
         try {
             agent = AppGui.getAgentManager().findAgentById(agentId);
+            if (agent == null) {
+                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("dialogEntityNotFound"),
+                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            this.oldAlive = agent.isAlive();
         } catch (ServiceFailureException ex) {
             logger.error("Service failure", ex);
+            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("dialogServiceFailure"),
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            return;
         }
-        setValues();
+        setInitialValues();
 
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        buttonOK.addActionListener((ActionEvent e ) -> onOK());
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
+        buttonCancel.addActionListener((ActionEvent e) -> dispose());
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -60,11 +62,8 @@ public class EditAgentDialog extends JDialog {
             }
         });
 
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction((ActionEvent e) -> dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
@@ -81,54 +80,63 @@ public class EditAgentDialog extends JDialog {
                     AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
             return;
         }
+
         String name = nameField.getText();
         String specialPower = spPowerField.getText();
         int rank = (int) rankSpinner.getValue();
 
-        if (! name.equals(agent.getName()) || ! specialPower.equals(agent.getSpecialPower()) || rank != agent.getRank()
+        if (!name.equals(agent.getName()) || !specialPower.equals(agent.getSpecialPower()) || rank != agent.getRank()
                 || aliveCheckBox.isSelected() != agent.isAlive()) {
-            boolean oldAlive = agent.isAlive();
-            agent = new AgentBuilder().id(agentId).name(name).specialPower(specialPower)
-                    .alive(aliveCheckBox.isSelected()).rank(rank).build();
-            Thread editAgent = new Thread(() -> {
-                synchronized (AppGui.LOCK) {
-                    updateInDB(oldAlive);
-                }
-            });
-            editAgent.start();
-            AppGui.getAgentTableModel().editData(agentIndex, agent);
+            EditAgentSwingWorker swingWorker = new EditAgentSwingWorker();
+            swingWorker.setAgentToEdit(new AgentBuilder().id(agentId).name(name).specialPower(specialPower)
+                    .alive(aliveCheckBox.isSelected()).rank(rank).build());
+            swingWorker.execute();
             dispose();
         }
     }
 
-    private void updateInDB(boolean oldAlive) {
-        try {
-            AppGui.getAgentManager().updateAgent(agent);
-            if (oldAlive != agent.isAlive()) {
-                List<Assignment> ofAgent = AppGui.getAssignmentManager().findAssignmentsOfAgent(agent.getId());
-                ofAgent.removeIf((assignment -> assignment.getEnd() != null));
-                for (Assignment a: ofAgent) {
-                    a.setEnd(LocalDate.now(Clock.systemUTC()));
-                    AppGui.getAssignmentManager().updateAssignment(a);
-                }
-            }
-        } catch (ServiceFailureException ex) {
-            logger.error("Cannot edit agent, DB problem - agent: {}", agent, ex.getMessage());
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("operationFailedWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
-        } catch (EntityValidationException ex) {
-            logger.error("Cannot edit agent, validation problem - agent: {}", agent, ex.getMessage());
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("operationFailedWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
-        }
-    }
-
-    private void setValues() {
+    private void setInitialValues() {
         nameField.setText(agent.getName());
         spPowerField.setText(agent.getSpecialPower());
         if (agent.isAlive()) {
             aliveCheckBox.setSelected(true);
         }
         rankSpinner.setValue(agent.getRank());
+    }
+
+    private class EditAgentSwingWorker extends SwingWorker<Void, Void> {
+        private Agent agentToEdit;
+
+        public void setAgentToEdit(Agent agentToEdit) {
+            this.agentToEdit = agentToEdit;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                get();
+                AppGui.getAgentTableModel().editData(agentIndex, agentToEdit);
+            } catch (ExecutionException ex) {
+                logger.error("Error while executing editAgent - Agent: {}" , agentToEdit, ex.getCause());
+                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogEditFailed"),
+                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            AppGui.getAgentManager().updateAgent(agentToEdit);
+            if (oldAlive != agentToEdit.isAlive()) {
+                List<Assignment> ofAgent = AppGui.getAssignmentManager().findAssignmentsOfAgent(agent.getId());
+                ofAgent.removeIf((assignment -> assignment.getEnd() != null));
+                for (Assignment a : ofAgent) {
+                    a.setEnd(LocalDate.now(Clock.systemUTC()));
+                    AppGui.getAssignmentManager().updateAssignment(a);
+                }
+            }
+            return null;
+        }
     }
 }

@@ -3,7 +3,6 @@ package guiApp;
 import cz.muni.fi.pv168.db_backend.backend.*;
 import cz.muni.fi.pv168.db_backend.Main;
 import cz.muni.fi.pv168.db_backend.common.DBUtils;
-import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
 import guiApp.tableModels.AgentTableModel;
 import guiApp.tableModels.AssignmentTableModel;
 import guiApp.tableModels.MissionTableModel;
@@ -12,20 +11,17 @@ import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 
 /**
@@ -55,7 +51,7 @@ public class AppGui {
             listAllAssignmentsButton, listAssignmentsButton;
     private JTable assignmentTable;
     private JCheckBox activeCheckBox;
-
+    //other
     private static DataSource ds;
     private static AgentManager agentManager;
     private static AssignmentManager assignmentManager;
@@ -66,18 +62,23 @@ public class AppGui {
     private static AssignmentTableModel assignmentTableModel;
     private static MissionTableModel missionTableModel;
 
-    public static final Object LOCK = new Object();
-
     public AppGui() {
         initializeAgentComponents();
-        callAgentFind(new Object[] { "findAllAgents" });
         initializeMissionComponents();
+        tabbedPane.addChangeListener((ChangeEvent e) -> {
+            if (tabbedPane.getSelectedIndex() == 0) {
+                listAllAgentsButton.doClick();
+            } else if (tabbedPane.getSelectedIndex() == 1) {
+                listAllMissionsButton.doClick();
+            }
+        });
     }
 
     private void createUIComponents() {
         assignmentTableModel = new AssignmentTableModel();
         missionTableModel = new MissionTableModel();
         agentTableModel = new AgentTableModel();
+
         agentTable = new JTable(agentTableModel);
         assignmentTable = new JTable(assignmentTableModel);
         missionTable = new JTable(missionTableModel);
@@ -152,77 +153,6 @@ public class AppGui {
         missionManager.setDataSource(ds);
     }
 
-    private void callAgentFind(Object[] args ) {
-        List<Agent> agents = new ArrayList<>();
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        Future<List<Agent>> result = es.submit(new Callable<List<Agent>>() {
-            public List<Agent> call() throws Exception {
-                try {
-                    switch (args[0].toString()) {
-                        case "findAllAgents":
-                            return agentManager.findAllAgents();
-                        case "findAgentsBySpecialPower":
-                            return agentManager.findAgentsBySpecialPower((String) args[1]);
-                        case "findAgentsByAlive":
-                            return agentManager.findAgentsByAlive((boolean) args[1]);
-                        case "findAgentsByRank":
-                            return agentManager.findAgentsByRank((int) args[1]);
-                        default:
-                            throw new IllegalArgumentException("Cannot parse operation");
-                    }
-                } catch (ServiceFailureException ex) {
-                    logger.error("Service failure", ex);
-                    return null;
-                }
-            }
-        });
-
-        try {
-            agents = result.get();
-        } catch (Exception ex) { /* left blank intentionally */ }
-        es.shutdown();
-        agentTableModel.deleteAllData();
-        for (Agent a : agents) {
-            agentTableModel.addData(a);
-        }
-    }
-
-    private void callMissionFind(Object[] args ) {
-        List<Mission> missions = new ArrayList<>();
-        ExecutorService es = Executors.newSingleThreadExecutor();
-        Future<List<Mission>> result = es.submit(new Callable<List<Mission>>() {
-            public List<Mission> call() throws Exception {
-                try {
-                    switch (args[0].toString()) {
-                        case "findAllMissions":
-                            return missionManager.findAllMissions();
-                        case "findMissionsByFinAndSucc": {
-                            List<Mission> result = missionManager.findMissionsBySuccess((boolean) args[1]);
-                            result.removeIf((mission ->  mission.isFinished() != ((boolean) args[2])));
-                            return result;
-                        }
-                        case "findMissionsByMinAgRank":
-                            return missionManager.findMissionsByMinAgentRank((int) args[1]);
-                        default:
-                            throw new IllegalArgumentException("Cannot parse operation");
-                    }
-                } catch (ServiceFailureException ex) {
-                    logger.error("Service failure", ex);
-                    return null;
-                }
-            }
-        });
-
-        try {
-            missions = result.get();
-        } catch (Exception ex) { /* left blank intentionally */ }
-        es.shutdown();
-        missionTableModel.deleteAllData();
-        for (Mission m : missions) {
-            missionTableModel.addData(m);
-        }
-    }
-
     private void initializeAgentComponents() {
         addAgentButton.addActionListener((ActionEvent e) -> createAddAgentDialog());
 
@@ -230,27 +160,40 @@ public class AppGui {
 
         deleteAgentButton.addActionListener((ActionEvent e) -> deleteAgent());
 
-        listAllAgentsButton.addActionListener((ActionEvent e) -> callAgentFind(new Object[] { "findAllAgents" }));
+        listAllAgentsButton.addActionListener((ActionEvent e) -> {
+                    FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
+                    sw.setArgs(new Object[] { "findAllAgents" });
+                    sw.execute();
+                });
 
-        listAliveAgentsButton.addActionListener(
-                (ActionEvent e) -> callAgentFind(new Object[] { "findAgentsByAlive", aliveCheckBox.isSelected() }));
+        listAliveAgentsButton.addActionListener((ActionEvent e) -> {
+                    FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
+                    sw.setArgs(new Object[] { "findAgentsByAlive", aliveCheckBox.isSelected() });
+                    sw.execute();
+                });
 
-        listSpPowAgentsButton.addActionListener(
-                (ActionEvent e) -> callAgentFind(new Object[] { "findAgentsBySpecialPower", spPowerField.getText() }));
+        listSpPowAgentsButton.addActionListener((ActionEvent e) -> {
+                    FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
+                    sw.setArgs(new Object[] { "findAgentsBySpecialPower", spPowerField.getText() });
+                    sw.execute();
+                });
 
-        listRankButton.addActionListener(
-                (ActionEvent e) -> callAgentFind(new Object[] { "findAgentsByRank", rankSpinner.getValue() }));
+        listRankButton.addActionListener((ActionEvent e) -> {
+                    FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
+                    sw.setArgs(new Object[] { "findAgentsByRank", rankSpinner.getValue() });
+                    sw.execute();
+                });
     }
 
     private void createAddAgentDialog() {
         AddAgentDialog addAgentDialog = new AddAgentDialog();
-        addAgentDialog.setTitle(AppGui.getRb().getString("addAgentDialogTitle"));
+        addAgentDialog.setTitle(rb.getString("addAgentDialogTitle"));
         addAgentDialog.pack();
         addAgentDialog.setVisible(true);
     }
-
+    
     private void createEditAgentDialog() {
-        if (missionTable.getSelectedRow() < 0) {
+        if (agentTable.getSelectedRow() < 0) {
             return;
         }
         Long agentToEditId = agentTableModel.getAgentId(
@@ -258,35 +201,26 @@ public class AppGui {
 
         EditAgentDialog editAgentDialog = new EditAgentDialog(agentToEditId,
                 agentTable.convertColumnIndexToModel(agentTable.getSelectedRow()));
-        editAgentDialog.setTitle(AppGui.getRb().getString("editAgentDialogTitle"));
+        editAgentDialog.setTitle(rb.getString("editAgentDialogTitle"));
         editAgentDialog.pack();
         editAgentDialog.setVisible(true);
     }
-
+    
     private void deleteAgent() {
-        if (missionTable.getSelectedRow() < 0) {
+        if (agentTable.getSelectedRow() < 0) {
             return;
         }
-        Long agentToDeleteId = agentTableModel.getAgentId(
-                agentTable.convertColumnIndexToModel(agentTable.getSelectedRow()));
-        Thread deleteAgent = new Thread(() -> {
-            synchronized (LOCK) {
-                Agent agentToDelete = agentManager.findAgentById(agentToDeleteId);
-                agentManager.deleteAgent(agentToDelete);
-                List<Assignment> toEnd = assignmentManager.findAssignmentsOfAgent(agentToDelete.getId());
-                toEnd.removeIf((assignment) -> assignment.getEnd() != null);
-                for (Assignment a: toEnd) {
-                    a.setEnd(LocalDate.now(Clock.systemUTC()));
-                    getAssignmentManager().updateAssignment(a);
-                }
-            }
-        });
-        deleteAgent.start();
-        agentTableModel.deleteData(agentTable.getSelectedRow());
-    }
-
-    private void initializeAssignmentComponents() {
-
+        int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("deleteQuestion"),
+                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.NO_OPTION) {
+            return;
+        }
+        DeleteAgentSwingWorker swingWorker = new DeleteAgentSwingWorker();
+        int selectedTableIndex = agentTable.convertColumnIndexToModel(agentTable.getSelectedRow());
+        Long agentToDeleteId = agentTableModel.getAgentId(selectedTableIndex);
+        swingWorker.setAgentToDeleteId(agentToDeleteId);
+        swingWorker.setAgentTableIndex(selectedTableIndex);
+        swingWorker.execute();
     }
 
     private void initializeMissionComponents() {
@@ -296,21 +230,29 @@ public class AppGui {
 
         deleteMissionButton.addActionListener((ActionEvent e) -> deleteMission());
 
-        listAllMissionsButton.addActionListener(
-                (ActionEvent e) -> callMissionFind(new Object[] { "findAllMissions" }));
-
-        listSucFinMissionsButton.addActionListener((ActionEvent e) -> {
-                callMissionFind(new Object[] { "findMissionsByFinAndSucc", successfulCheckBox.isSelected(),
-                        finishedCheckBox.isSelected()});
+        listAllMissionsButton.addActionListener((ActionEvent e) -> {
+            FindMissionsSwingWorker swingWorker = new FindMissionsSwingWorker();
+            swingWorker.setArgs(new Object[]{ "findAllMissions" });
+            swingWorker.execute();
         });
 
-        listMinAgRkMissionsButton.addActionListener(
-                (ActionEvent e) -> callMissionFind(new Object[] { "findMissionsByMinAgRank", minAgRankSpinner.getValue() }));
+        listSucFinMissionsButton.addActionListener((ActionEvent e) -> {
+            FindMissionsSwingWorker swingWorker = new FindMissionsSwingWorker();
+            swingWorker.setArgs(new Object[]{ "findMissionsBySucFin", successfulCheckBox.isSelected(),
+                    finishedCheckBox.isSelected() });
+            swingWorker.execute();
+        });
+
+        listMinAgRkMissionsButton.addActionListener((ActionEvent e) -> {
+            FindMissionsSwingWorker swingWorker = new FindMissionsSwingWorker();
+            swingWorker.setArgs(new Object[]{ "findMissionsByMinAgRank", minAgRankSpinner.getValue() });
+            swingWorker.execute();
+        });
     }
 
     private void createAddMissionDialog() {
         AddMissionDialog addMissionDialog = new AddMissionDialog();
-        addMissionDialog.setTitle(AppGui.getRb().getString("addMissionDialogTitle"));
+        addMissionDialog.setTitle(rb.getString("addMissionDialogTitle"));
         addMissionDialog.pack();
         addMissionDialog.setVisible(true);
     }
@@ -324,7 +266,7 @@ public class AppGui {
 
         EditMissionDialog editMissionDialog = new EditMissionDialog(missionToEditId,
                 missionTable.convertColumnIndexToModel(missionTable.getSelectedRow()));
-        editMissionDialog.setTitle(AppGui.getRb().getString("editMissionDialogTitle"));
+        editMissionDialog.setTitle(rb.getString("editMissionDialogTitle"));
         editMissionDialog.pack();
         editMissionDialog.setVisible(true);
     }
@@ -333,22 +275,181 @@ public class AppGui {
         if (missionTable.getSelectedRow() < 0) {
             return;
         }
-        Long missionToDeleteId = missionTableModel.getMissionId(
-                missionTable.convertColumnIndexToModel(missionTable.getSelectedRow()));
-
-        Thread deleteMission = new Thread(() -> {
-            synchronized (LOCK) {
-                Mission missionToDelete = missionManager.findMissionById(missionToDeleteId);
-                missionManager.deleteMission(missionToDelete);
-                List<Assignment> toEnd = assignmentManager.findAssignmentsOfMission(missionToDeleteId);
-                toEnd.removeIf((assignment) -> assignment.getEnd() != null);
-                for (Assignment a: toEnd) {
-                    a.setEnd(LocalDate.now(Clock.systemUTC()));
-                    getAssignmentManager().updateAssignment(a);
-                }
-            }
-        });
-        deleteMission.start();
-        missionTableModel.deleteData(missionTable.getSelectedRow());
+        int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("deleteQuestion"),
+                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.NO_OPTION) {
+            return;
+        }
+        DeleteMissionSwingWorker swingWorker = new DeleteMissionSwingWorker();
+        int selectedTableIndex = missionTable.convertColumnIndexToModel(missionTable.getSelectedRow());
+        Long missionToDeleteId = missionTableModel.getMissionId(selectedTableIndex);
+        swingWorker.setMissionToDeleteId(missionToDeleteId);
+        swingWorker.setMissionTableIndex(selectedTableIndex);
     }
+
+    private class DeleteAgentSwingWorker extends SwingWorker<Void, Void> {
+        private Long agentToDeleteId;
+        private int agentTableIndex;
+
+        public void setAgentTableIndex(int agentTableIndex) {
+            this.agentTableIndex = agentTableIndex;
+        }
+
+        public void setAgentToDeleteId(Long agentToDeleteId) {
+            this.agentToDeleteId = agentToDeleteId;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                get();
+                agentTableModel.deleteData(agentTableIndex);
+            } catch (ExecutionException ex) {
+                logger.error("Error in executing deleteAgent: {}", ex.getMessage(), ex.getCause());
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("agentDeleteFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            Agent agentToDelete = agentManager.findAgentById(agentToDeleteId);
+            agentManager.deleteAgent(agentToDelete);
+            List<Assignment> toEnd = assignmentManager.findAssignmentsOfAgent(agentToDeleteId);
+            toEnd.removeIf((assignment) -> assignment.getEnd() != null);
+            for (Assignment a : toEnd) {
+                a.setEnd(LocalDate.now(Clock.systemUTC()));
+                getAssignmentManager().updateAssignment(a);
+            }
+            return null;
+        }
+    }
+
+    private class FindAgentsSwingWorker extends SwingWorker<List<Agent>, Void> {
+        //args[0] = string representing find operation, args[1] = parameters for operation
+        private Object[] args;
+
+        public void setArgs(Object[] args) {
+            this.args = args;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                List<Agent> agents = get();
+                agentTableModel.deleteAllData();
+                for (Agent a : agents) {
+                    agentTableModel.addData(a);
+                }
+            } catch (ExecutionException ex) {
+                logger.error("Error in executing " + args[0].toString() + ": {}", ex.getMessage(), ex.getCause());
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("agentFindFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected List<Agent> doInBackground() throws Exception {
+            switch (args[0].toString()) {
+                case "findAllAgents":
+                    return agentManager.findAllAgents();
+                case "findAgentsBySpecialPower":
+                    return agentManager.findAgentsBySpecialPower((String) args[1]);
+                case "findAgentsByAlive":
+                    return agentManager.findAgentsByAlive((boolean) args[1]);
+                case "findAgentsByRank":
+                    return agentManager.findAgentsByRank((int) args[1]);
+                default:
+                    throw new IllegalArgumentException("Cannot parse operation");
+            }
+        }
+    }
+    
+    private class DeleteMissionSwingWorker extends SwingWorker<Void, Void> {
+        private Long missionToDeleteId;
+        private int missionTableIndex;
+
+        public void setMissionToDeleteId(Long missionToDeleteId) {
+            this.missionToDeleteId = missionToDeleteId;
+        }
+
+        public void setMissionTableIndex(int missionTableIndex) {
+            this.missionTableIndex = missionTableIndex;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                get();
+                missionTableModel.deleteData(missionTableIndex);
+            } catch (ExecutionException ex) {
+                logger.error("Error in executing deleteMission: {}", ex.getMessage(), ex.getCause());
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("missionDeleteFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            Mission missionToDelete = missionManager.findMissionById(missionToDeleteId);
+            missionManager.deleteMission(missionToDelete);
+            List<Assignment> toEnd = assignmentManager.findAssignmentsOfMission(missionToDeleteId);
+            toEnd.removeIf((assignment) -> assignment.getEnd() != null);
+            for (Assignment a : toEnd) {
+                a.setEnd(LocalDate.now(Clock.systemUTC()));
+                getAssignmentManager().updateAssignment(a);
+            }
+            return null;
+        }
+    }
+
+    private class FindMissionsSwingWorker extends SwingWorker<List<Mission>, Void> {
+        //args[0] = string representing find operation, args[1], args[2] = parameters for operation
+        private Object[] args;
+
+        public void setArgs(Object[] args) {
+            this.args = args;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                List<Mission> missions = get();
+                missionTableModel.deleteAllData();
+                for (Mission m : missions) {
+                    missionTableModel.addData(m);
+                }
+            } catch (ExecutionException ex) {
+                logger.error("Error in executing " + args[0].toString() + ": {}", ex.getMessage(), ex.getCause());
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("missionFindFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected List<Mission> doInBackground() throws Exception {
+            switch (args[0].toString()) {
+                case "findAllMissions":
+                    return missionManager.findAllMissions();
+                case "findMissionsBySucFin": {
+                    List<Mission> result = missionManager.findMissionsBySuccess((boolean) args[1]);
+                    result.removeIf((mission) -> mission.isFinished() != (boolean) args[2]);
+                    return result;
+                }
+                case "findMissionsByMinAgRank":
+                    return missionManager.findMissionsByMinAgentRank((int) args[1]);
+                default:
+                    throw new IllegalArgumentException("Cannot parse operation");
+            }
+        }
+    }
+
 }

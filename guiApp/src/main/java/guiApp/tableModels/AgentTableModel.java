@@ -46,13 +46,13 @@ public class AgentTableModel extends AbstractTableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return AppGui.getRb().getString("agentTableNameLabel");
+                return AppGui.getRb().getString("nameLabel");
             case 1:
-                return AppGui.getRb().getString("agentTableSpecialPowerLabel");
+                return AppGui.getRb().getString("spPowerLabel");
             case 2:
-                return AppGui.getRb().getString("agentTableAliveLabel");
+                return AppGui.getRb().getString("aliveLabel");
             case 3:
-                return AppGui.getRb().getString("agentTableRankLabel");
+                return AppGui.getRb().getString("rankLabel");
             default:
                 throw new IllegalArgumentException("Invalid columnIndex");
         }
@@ -76,7 +76,7 @@ public class AgentTableModel extends AbstractTableModel {
     public void editData(int index, Agent agent) {
         data.set(index, agent);
         int lastRow = data.size() - 1;
-        AppGui.getAgentTableModel().fireTableRowsUpdated(lastRow, lastRow);
+        fireTableRowsUpdated(lastRow, lastRow);
     }
 
     public Long getAgentId(int index) {

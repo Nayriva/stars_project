@@ -46,13 +46,13 @@ public class AssignmentTableModel extends AbstractTableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return AppGui.getRb().getString("assignmentTableAgentLabel");
+                return AppGui.getRb().getString("agentLabel");
             case 1:
-                return AppGui.getRb().getString("assignmentTableMissionLabel");
+                return AppGui.getRb().getString("missionLabel");
             case 2:
-                return AppGui.getRb().getString("assignmentTableStartLabel");
+                return AppGui.getRb().getString("startLabel");
             case 3:
-                return AppGui.getRb().getString("assignmentTableEndLabel");
+                return AppGui.getRb().getString("endLabel");
             default:
                 throw new IllegalArgumentException("Invalid columnIndex");
         }

@@ -2,14 +2,13 @@ package guiApp;
 
 import cz.muni.fi.pv168.db_backend.backend.Agent;
 import cz.muni.fi.pv168.db_backend.common.AgentBuilder;
-import cz.muni.fi.pv168.db_backend.common.EntityValidationException;
-import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.concurrent.ExecutionException;
 
 public class AddAgentDialog extends JDialog {
     private final static Logger logger = LoggerFactory.getLogger(AddAgentDialog.class);
@@ -24,16 +23,8 @@ public class AddAgentDialog extends JDialog {
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
+        buttonOK.addActionListener((ActionEvent e) -> onOK());
+        buttonCancel.addActionListener((ActionEvent e) -> dispose());
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -42,11 +33,8 @@ public class AddAgentDialog extends JDialog {
             }
         });
 
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction((ActionEvent e) -> dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
@@ -63,28 +51,43 @@ public class AddAgentDialog extends JDialog {
                     AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
+
         String name = nameField.getText();
         String specialPower = specialPowerField.getText();
         int rank = (int) rankSpinner.getValue();
 
-        Agent agent = new AgentBuilder().name(name).specialPower(specialPower).alive(true).rank(rank).build();
-        Thread createAgent = new Thread(() -> {
-            synchronized (AppGui.LOCK) {
-                try {
-                    AppGui.getAgentManager().createAgent(agent);
-                } catch (ServiceFailureException ex) {
-                    logger.error("Cannot add agent into DB, DB problem - agent: {}", agent, ex.getMessage());
-                    JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("operationFailedWarning"),
-                            AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
-                } catch (EntityValidationException ex) {
-                    logger.error("Cannot add agent into DB, validation problem - agent: {}", agent, ex.getMessage());
-                    JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("operationFailedWarning"),
-                            AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-        createAgent.start();
-        AppGui.getAgentTableModel().addData(agent);
+        AddAgentSwingWorker swingWorker = new AddAgentSwingWorker();
+        swingWorker.setAgentToAdd(
+                new AgentBuilder().name(name).specialPower(specialPower).alive(true).rank(rank).build());
+        swingWorker.execute();
         dispose();
+    }
+
+    private class AddAgentSwingWorker extends SwingWorker <Void, Void> {
+        private Agent agentToAdd;
+
+        public void setAgentToAdd(Agent agentToAdd) {
+            this.agentToAdd = agentToAdd;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                get();
+                AppGui.getAgentTableModel().addData(agentToAdd);
+            } catch (ExecutionException ex) {
+                logger.error("Error while executing addAgent - Agent: {}" , agentToAdd, ex.getCause());
+                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogAddFailed"),
+                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            AppGui.getAgentManager().createAgent(agentToAdd);
+            return null;
+        }
     }
 }

@@ -2,7 +2,6 @@ package guiApp;
 
 import cz.muni.fi.pv168.db_backend.backend.Assignment;
 import cz.muni.fi.pv168.db_backend.backend.Mission;
-import cz.muni.fi.pv168.db_backend.common.EntityValidationException;
 import cz.muni.fi.pv168.db_backend.common.MissionBuilder;
 import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import java.awt.event.*;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class EditMissionDialog extends JDialog {
     private final static Logger logger = LoggerFactory.getLogger(EditMissionDialog.class);
@@ -26,32 +26,36 @@ public class EditMissionDialog extends JDialog {
     private Long missionId;
     private int missionIndex;
     private Mission mission;
+    private boolean oldFinished;
+    private boolean oldSuccessful;
 
     public EditMissionDialog(Long missionId, int missionIndex) {
         this.missionId = missionId;
         this.missionIndex = missionIndex;
         try {
             mission = AppGui.getMissionManager().findMissionById(missionId);
+            if (mission == null) {
+                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("dialogEntityNotFound"),
+                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
         } catch (ServiceFailureException ex) {
             logger.error("Service failure", ex);
+            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("dialogServiceFailure"),
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            return;
         }
+        oldSuccessful = mission.isSuccessful();
+        oldFinished = mission.isFinished();
         setValues();
 
         setContentPane(contentPane);
         setModal(true);
         getRootPane().setDefaultButton(buttonOK);
 
-        buttonOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                onOK();
-            }
-        });
+        buttonOK.addActionListener((ActionEvent e) -> onOK());
 
-        buttonCancel.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
+        buttonCancel.addActionListener((ActionEvent e) -> dispose());
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         addWindowListener(new WindowAdapter() {
@@ -60,11 +64,8 @@ public class EditMissionDialog extends JDialog {
             }
         });
 
-        contentPane.registerKeyboardAction(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction((ActionEvent e) -> dispose(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
@@ -93,40 +94,12 @@ public class EditMissionDialog extends JDialog {
         if (! name.equals(mission.getName()) || ! task.equals(mission.getTask()) || ! place.equals(mission.getPlace())
                  || minAgRank != mission.getMinAgentRank() || successfulCheckBox.isSelected() != mission.isSuccessful()
                 || finishedCheckBox.isSelected() != mission.isFinished()) {
-            boolean oldSuccessful = mission.isSuccessful();
-            boolean oldFinished = mission.isFinished();
-            mission = new MissionBuilder().id(missionId).name(name).task(task).place(place)
-                    .successful(successfulCheckBox.isSelected()).finished(finishedCheckBox.isSelected()).minAgentRank(minAgRank).build();
-            Thread editMission = new Thread(() -> {
-                synchronized (AppGui.LOCK) {
-                    updateInDB(oldSuccessful, oldFinished);
-                }
-            });
-            editMission.start();
-            AppGui.getMissionTableModel().editData(missionIndex, mission);
+            EditMissionSwingWorker swingWorker= new EditMissionSwingWorker();
+            swingWorker.setMissionToEdit(new MissionBuilder().id(missionId).name(name).task(task).place(place)
+                    .successful(successfulCheckBox.isSelected()).finished(finishedCheckBox.isSelected())
+                    .minAgentRank(minAgRank).build());
+            swingWorker.execute();
             dispose();
-        }
-    }
-
-    private void updateInDB(boolean oldSuccessful, boolean oldFinished) {
-        try {
-            AppGui.getMissionManager().updateMission(mission);
-            if (oldSuccessful != mission.isSuccessful() || oldFinished != mission.isFinished()) {
-                List<Assignment> ofMission = AppGui.getAssignmentManager().findAssignmentsOfMission(mission.getId());
-                ofMission.removeIf((assignment -> assignment.getEnd() != null));
-                for (Assignment a: ofMission) {
-                    a.setEnd(LocalDate.now(Clock.systemUTC()));
-                    AppGui.getAssignmentManager().updateAssignment(a);
-                }
-            }
-        } catch (ServiceFailureException ex) {
-            logger.error("Cannot edit mission, DB problem - mission: {}", mission, ex.getMessage());
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("operationFailedWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
-        } catch (EntityValidationException ex) {
-            logger.error("Cannot edit mission, validation problem - mission: {}", mission, ex.getMessage());
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("operationFailedWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
         }
     }
 
@@ -141,5 +114,41 @@ public class EditMissionDialog extends JDialog {
             finishedCheckBox.setSelected(true);
         }
         minAgRankSpinner.setValue(mission.getMinAgentRank());
+    }
+
+    private class EditMissionSwingWorker extends SwingWorker<Void, Void> {
+        private Mission missionToEdit;
+
+        public void setMissionToEdit(Mission missionToEdit) {
+            this.missionToEdit = missionToEdit;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                get();
+                AppGui.getMissionTableModel().editData(missionIndex, missionToEdit);
+            } catch (ExecutionException ex) {
+                logger.error("Error while executing editMission - Mission: {}" , missionToEdit, ex.getCause());
+                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("missionDialogEditFailed"),
+                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            AppGui.getMissionManager().updateMission(missionToEdit);
+            if (oldSuccessful != mission.isSuccessful() || oldFinished != mission.isFinished()) {
+                List<Assignment> ofMission = AppGui.getAssignmentManager().findAssignmentsOfMission(mission.getId());
+                ofMission.removeIf((assignment -> assignment.getEnd() != null));
+                for (Assignment a : ofMission) {
+                    a.setEnd(LocalDate.now(Clock.systemUTC()));
+                    AppGui.getAssignmentManager().updateAssignment(a);
+                }
+            }
+            return null;
+        }
     }
 }

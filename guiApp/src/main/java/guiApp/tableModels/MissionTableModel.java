@@ -50,17 +50,17 @@ public class MissionTableModel extends AbstractTableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return AppGui.getRb().getString("missionTableNameLabel");
+                return AppGui.getRb().getString("nameLabel");
             case 1:
-                return AppGui.getRb().getString("missionTableTaskLabel");
+                return AppGui.getRb().getString("taskLabel");
             case 2:
-                return AppGui.getRb().getString("missionTablePlaceLabel");
+                return AppGui.getRb().getString("placeLabel");
             case 3:
-                return AppGui.getRb().getString("missionTableSuccessfulLabel");
+                return AppGui.getRb().getString("successfulLabel");
             case 4:
-                return AppGui.getRb().getString("missionTableFinishedLabel");
+                return AppGui.getRb().getString("finishedLabel");
             case 5:
-                return AppGui.getRb().getString("missionTableMinAgentRankLabel");
+                return AppGui.getRb().getString("minAgRankLabel");
             default:
                 throw new IllegalArgumentException("Invalid columnIndex");
         }

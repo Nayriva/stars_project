@@ -65,7 +65,7 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="guiApp/localization" key="addMissionNameLabel"/>
+              <text resource-bundle="guiApp/localization" key="nameLabel"/>
             </properties>
           </component>
           <component id="62523" class="javax.swing.JTextField" binding="nameField">
@@ -83,7 +83,7 @@
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="guiApp/localization" key="addMissionTaskLabel"/>
+              <text resource-bundle="guiApp/localization" key="taskLabel"/>
             </properties>
           </component>
           <component id="561f3" class="javax.swing.JTextField" binding="taskField">
@@ -101,7 +101,7 @@
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="guiApp/localization" key="addMissionPlaceLabel"/>
+              <text resource-bundle="guiApp/localization" key="placeLabel"/>
             </properties>
           </component>
           <component id="20394" class="javax.swing.JTextField" binding="placeField">
@@ -117,7 +117,7 @@
               <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="guiApp/localization" key="addMissionMinAgRankLabel"/>
+              <text resource-bundle="guiApp/localization" key="minAgRankLabel"/>
             </properties>
           </component>
           <component id="8375b" class="javax.swing.JSpinner" binding="minAgRankSpinner">

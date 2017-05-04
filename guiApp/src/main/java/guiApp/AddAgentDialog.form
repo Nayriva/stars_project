@@ -65,7 +65,7 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="guiApp/localization" key="addAgentNameLabel"/>
+              <text resource-bundle="guiApp/localization" key="nameLabel"/>
             </properties>
           </component>
           <component id="e76ea" class="javax.swing.JTextField" binding="nameField">
@@ -81,7 +81,7 @@
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="guiApp/localization" key="addAgentSpecialPowerLabel"/>
+              <text resource-bundle="guiApp/localization" key="spPowerLabel"/>
             </properties>
           </component>
           <component id="1c5c2" class="javax.swing.JTextField" binding="specialPowerField">
@@ -97,7 +97,7 @@
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="guiApp/localization" key="addAgentRankLabel"/>
+              <text resource-bundle="guiApp/localization" key="rankLabel"/>
             </properties>
           </component>
           <component id="f1cb7" class="javax.swing.JSpinner" binding="rankSpinner">
