@@ -12,9 +12,14 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.sql.SQLException;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -47,7 +52,7 @@ public class AppGui {
     private JSpinner minAgRankSpinner;
     private JTable missionTable;
     //assignment
-    private JButton createAssignmentButton, editAssignmentButton, endAssignmentButton, deleteAssignmentButton,
+    private JButton addAssignmentButton, editAssignmentButton, endAssignmentButton, deleteAssignmentButton,
             listAllAssignmentsButton, listAssignmentsButton;
     private JTable assignmentTable;
     private JCheckBox activeCheckBox;
@@ -65,11 +70,14 @@ public class AppGui {
     public AppGui() {
         initializeAgentComponents();
         initializeMissionComponents();
+        initializeAssignmentComponents();
         tabbedPane.addChangeListener((ChangeEvent e) -> {
             if (tabbedPane.getSelectedIndex() == 0) {
                 listAllAgentsButton.doClick();
             } else if (tabbedPane.getSelectedIndex() == 1) {
                 listAllMissionsButton.doClick();
+            } else if (tabbedPane.getSelectedIndex() == 2) {
+                listAllAssignmentsButton.doClick();
             }
         });
     }
@@ -125,7 +133,25 @@ public class AppGui {
 
         JFrame frame = new JFrame(rb.getString("mainTitle"));
         frame.setContentPane(new AppGui().mainPanel);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try (ObjectOutputStream agentsOOS = new ObjectOutputStream(new FileOutputStream(
+                        "additionalResources/serialization/agentStrings.ser"));
+                     ObjectOutputStream missionsOOS = new ObjectOutputStream(new FileOutputStream(
+                             "additionalResources/serialization/missionStrings.ser")))
+                {
+                    logger.debug("Serialization of hashmaps...");
+                    agentsOOS.writeObject(assignmentTableModel.getAgents());
+                    missionsOOS.writeObject(assignmentTableModel.getMissions());
+                    logger.debug("Serialization of hashmaps finished...");
+                } catch (IOException ex) {
+                    logger.error("Serialization of hashmaps failed", ex);
+                    System.exit(3);
+                }
+                System.exit(0);
+            }
+        });
         frame.pack();
         frame.setVisible(true);
     }
@@ -285,6 +311,88 @@ public class AppGui {
         Long missionToDeleteId = missionTableModel.getMissionId(selectedTableIndex);
         swingWorker.setMissionToDeleteId(missionToDeleteId);
         swingWorker.setMissionTableIndex(selectedTableIndex);
+        swingWorker.execute();
+    }
+
+    private void initializeAssignmentComponents() {
+        addAssignmentButton.addActionListener((ActionEvent e) -> createAddAssignmentDialog());
+
+        editAssignmentButton.addActionListener((ActionEvent e) -> createEditAssignmentDialog());
+
+        deleteAssignmentButton.addActionListener((ActionEvent e) -> deleteAssignment());
+
+        endAssignmentButton.addActionListener((ActionEvent e) -> endAssignment());
+
+        listAllAssignmentsButton.addActionListener((ActionEvent e) -> {
+            FindAssignmentsSwingWorker swingWorker = new FindAssignmentsSwingWorker();
+            swingWorker.setOperation("findAllAssignments");
+            swingWorker.execute();
+        });
+
+        listAssignmentsButton.addActionListener((ActionEvent e) -> {
+            FindAssignmentsSwingWorker swingWorker = new FindAssignmentsSwingWorker();
+            if (activeCheckBox.isSelected()) {
+                swingWorker.setOperation("findActiveAssignments");
+            } else {
+                swingWorker.setOperation("findEndedAssignments");
+            }
+            swingWorker.execute();
+        });
+    }
+
+    private void createAddAssignmentDialog() {
+        AddAssignmentDialog addAssignmentDialog = new AddAssignmentDialog();
+        addAssignmentDialog.setTitle(rb.getString("addAssignmentDialogTitle"));
+        addAssignmentDialog.pack();
+        addAssignmentDialog.setVisible(true);
+    }
+
+    private void createEditAssignmentDialog() {
+        if (assignmentTable.getSelectedRow() < 0) {
+            return;
+        }
+        Long assignmentToEditId = assignmentTableModel.getAssignmentId(
+                assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow()));
+
+        EditAssignmentDialog editAssignmentDialog = new EditAssignmentDialog(assignmentToEditId,
+                assignmentTable.convertColumnIndexToModel(missionTable.getSelectedRow()));
+        editAssignmentDialog.setTitle(rb.getString("editAssignmentDialogTitle"));
+        editAssignmentDialog.pack();
+        editAssignmentDialog.setVisible(true);
+    }
+
+    private void deleteAssignment() {
+        if (assignmentTable.getSelectedRow() < 0) {
+            return;
+        }
+        int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("deleteQuestion"),
+                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.NO_OPTION) {
+            return;
+        }
+        DeleteAssignmentSwingWorker swingWorker = new DeleteAssignmentSwingWorker();
+        int selectedTableIndex = assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow());
+        Long assignmentToDeleteId = assignmentTableModel.getAssignmentId(selectedTableIndex);
+        swingWorker.setAssignmentToDeleteId(assignmentToDeleteId);
+        swingWorker.setAssignmentTableIndex(selectedTableIndex);
+        swingWorker.execute();
+    }
+
+    private void endAssignment() {
+        if (assignmentTable.getSelectedRow() < 0) {
+            return;
+        }
+        int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("endQuestion"),
+                rb.getString("endAssignmentTitle"), JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.NO_OPTION) {
+            return;
+        }
+        EndAssignmentSwingWorker swingWorker = new EndAssignmentSwingWorker();
+        int selectedTableIndex = assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow());
+        Long assignmentToEnd = assignmentTableModel.getAssignmentId(selectedTableIndex);
+        swingWorker.setAssignmentToEndId(assignmentToEnd);
+        swingWorker.setAssignmentTableIndex(selectedTableIndex);
+        swingWorker.execute();
     }
 
     private class DeleteAgentSwingWorker extends SwingWorker<Void, Void> {
@@ -452,4 +560,111 @@ public class AppGui {
         }
     }
 
+    private class DeleteAssignmentSwingWorker extends SwingWorker<Void, Void> {
+        private Long assignmentToDeleteId;
+        private int assignmentTableIndex;
+
+        public void setAssignmentToDeleteId(Long assignmentToDeleteId) {
+            this.assignmentToDeleteId = assignmentToDeleteId;
+        }
+
+        public void setAssignmentTableIndex(int assignmentTableIndex) {
+            this.assignmentTableIndex = assignmentTableIndex;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                get();
+                assignmentTableModel.deleteData(assignmentTableIndex);
+            } catch (ExecutionException ex) {
+                logger.error("Error in executing deleteAssignment: {}", ex.getMessage(), ex.getCause());
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("assignmentDeleteFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected Void doInBackground() throws Exception {
+            Assignment assignment = assignmentManager.findAssignmentById(assignmentToDeleteId);
+            assignmentManager.deleteAssignment(assignment);
+            return null;
+        }
+    }
+
+    private class EndAssignmentSwingWorker extends SwingWorker<Assignment, Void> {
+        private Long assignmentToEndId;
+        private int assignmentTableIndex;
+
+        public void setAssignmentToEndId(Long assignmentToEndId) {
+            this.assignmentToEndId = assignmentToEndId;
+        }
+
+        public void setAssignmentTableIndex(int assignmentTableIndex) {
+            this.assignmentTableIndex = assignmentTableIndex;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                Assignment updated = get();
+                assignmentTableModel.editData(assignmentTableIndex, updated);
+            } catch (ExecutionException ex) {
+                logger.error("Error in executing endAssignment: {}", ex.getMessage(), ex.getCause());
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("assignmentEndFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected Assignment doInBackground() throws Exception {
+            Assignment assignment = assignmentManager.findAssignmentById(assignmentToEndId);
+            assignment.setEnd(LocalDate.now());
+            assignmentManager.updateAssignment(assignment);
+            return assignment;
+        }
+    }
+
+    private class FindAssignmentsSwingWorker extends SwingWorker<List<Assignment>, Void> {
+        String operation;
+
+        public void setOperation(String operation) {
+            this.operation = operation;
+        }
+
+        @Override
+        protected void done() {
+            try {
+                List<Assignment> assignments = get();
+                assignmentTableModel.deleteAllData();
+                for (Assignment a : assignments) {
+                    assignmentTableModel.addData(a);
+                }
+            } catch (ExecutionException ex) {
+                logger.error("Error in executing " + operation + ": {}", ex.getMessage(), ex.getCause());
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("assignmentFindFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            } catch (InterruptedException ex) {
+                //left blank intentionally, this should never happen
+            }
+        }
+
+        @Override
+        protected List<Assignment> doInBackground() throws Exception {
+            switch (operation) {
+                case "findAllAssignments":
+                    return assignmentManager.findAllAssignments();
+                case "findActiveAssignments":
+                    return assignmentManager.findActiveAssignments();
+                case "findEndedAssignments":
+                    return assignmentManager.findEndedAssignments();
+                default:
+                    throw new IllegalArgumentException("Cannot parse operation");
+            }
+        }
+    }
 }

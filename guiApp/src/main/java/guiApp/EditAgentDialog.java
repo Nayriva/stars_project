@@ -64,20 +64,22 @@ public class EditAgentDialog extends JDialog {
 
         contentPane.registerKeyboardAction((ActionEvent e) -> dispose(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction((ActionEvent e) -> buttonOK.doClick(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
         if (nameField.getText() == null || nameField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogNameWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         } else if (spPowerField.getText() == null || spPowerField.getText().isEmpty()) {
             JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogSpPowerWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         } else if (rankSpinner.getValue() == null || ((int) rankSpinner.getValue()) < 1) {
             JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogRankWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
+                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -116,6 +118,8 @@ public class EditAgentDialog extends JDialog {
             try {
                 get();
                 AppGui.getAgentTableModel().editData(agentIndex, agentToEdit);
+                AppGui.getAssignmentTableModel().editAgentString(agentToEdit.getId(),
+                        agentToEdit.getName() + ", " + agentToEdit.getSpecialPower() + ", " + agentToEdit.getRank());
             } catch (ExecutionException ex) {
                 logger.error("Error while executing editAgent - Agent: {}" , agentToEdit, ex.getCause());
                 JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogEditFailed"),

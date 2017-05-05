@@ -66,6 +66,8 @@ public class EditMissionDialog extends JDialog {
 
         contentPane.registerKeyboardAction((ActionEvent e) -> dispose(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction((ActionEvent e) -> buttonOK.doClick(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
@@ -128,6 +130,9 @@ public class EditMissionDialog extends JDialog {
             try {
                 get();
                 AppGui.getMissionTableModel().editData(missionIndex, missionToEdit);
+                AppGui.getAssignmentTableModel().editMissionString(missionToEdit.getId(),
+                        missionToEdit.getName() + ", " + missionToEdit.getTask() + ", "
+                                + missionToEdit.getPlace() + ", " + missionToEdit.getMinAgentRank() );
             } catch (ExecutionException ex) {
                 logger.error("Error while executing editMission - Mission: {}" , missionToEdit, ex.getCause());
                 JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("missionDialogEditFailed"),

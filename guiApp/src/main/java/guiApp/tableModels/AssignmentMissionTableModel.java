@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by nayriva on 2.5.2017.
+ * TODO: create javadoc
+ *
+ * @author Dominik Frantisek Bucik
  */
-public class MissionTableModel extends AbstractTableModel {
-
+public class AssignmentMissionTableModel extends AbstractTableModel {
     private List<Mission> data = new ArrayList<>();
 
     @Override
@@ -21,7 +22,7 @@ public class MissionTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 6;
+        return 4;
     }
 
     @Override
@@ -35,10 +36,6 @@ public class MissionTableModel extends AbstractTableModel {
             case 2:
                 return mission.getPlace();
             case 3:
-                return mission.isSuccessful();
-            case 4:
-                return mission.isFinished();
-            case 5:
                 return mission.getMinAgentRank();
             default:
                 throw new IllegalArgumentException("Invalid rowIndex");
@@ -55,10 +52,6 @@ public class MissionTableModel extends AbstractTableModel {
             case 2:
                 return AppGui.getRb().getString("placeLabel");
             case 3:
-                return AppGui.getRb().getString("successfulLabel");
-            case 4:
-                return AppGui.getRb().getString("finishedLabel");
-            case 5:
                 return AppGui.getRb().getString("minAgRankLabel");
             default:
                 throw new IllegalArgumentException("Invalid columnIndex");
@@ -73,39 +66,18 @@ public class MissionTableModel extends AbstractTableModel {
             case 2:
                 return String.class;
             case 3:
-            case 4:
-                return Boolean.class;
-            case 5:
                 return Integer.class;
             default:
                 throw new IllegalArgumentException("Invalid columnIndex");
         }
     }
 
-    public void editData(int index, Mission mission) {
-        data.set(index, mission);
-        int lastRow = data.size() - 1;
-        fireTableRowsUpdated(lastRow, lastRow);
+    public Mission getMission(int index) {
+        return data.get(index);
     }
 
-    public Long getMissionId(int index) {
-        return data.get(index).getId();
-    }
-
-    public void deleteData(int index) {
-        data.remove(index);
-        int lastRow = data.size() - 1;
-        fireTableRowsDeleted(lastRow, lastRow);
-    }
-
-    public void deleteAllData() {
-        data.clear();
-        int lastRow = data.size() - 1;
-        fireTableRowsDeleted(lastRow, lastRow);
-    }
-
-    public void addData(Mission mission) {
-        data.add(mission);
+    public void addData(List<Mission> missions) {
+        data.addAll(missions);
         int lastRow = data.size() - 1;
         fireTableRowsInserted(lastRow, lastRow);
     }

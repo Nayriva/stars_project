@@ -35,6 +35,8 @@ public class AddMissionDialog extends JDialog {
 
         contentPane.registerKeyboardAction((ActionEvent e) -> dispose()
                 , KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction((ActionEvent e) -> buttonOK.doClick(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
@@ -80,6 +82,9 @@ public class AddMissionDialog extends JDialog {
             try {
                 get();
                 AppGui.getMissionTableModel().addData(missionToAdd);
+                AppGui.getAssignmentTableModel().addMissionString(missionToAdd.getId(),
+                        missionToAdd.getName() + ", " + missionToAdd.getTask() + ", "
+                                + missionToAdd.getPlace() + ", " + missionToAdd.getMinAgentRank() );
             } catch (ExecutionException ex) {
                 logger.error("Error while executing addMission - Mission: {}" , missionToAdd, ex.getCause());
                 JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("missionDialogAddFailed"),

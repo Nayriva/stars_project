@@ -35,6 +35,8 @@ public class AddAgentDialog extends JDialog {
 
         contentPane.registerKeyboardAction((ActionEvent e) -> dispose(),
                 KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        contentPane.registerKeyboardAction((ActionEvent e) -> buttonOK.doClick(),
+                KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
     }
 
     private void onOK() {
@@ -75,6 +77,8 @@ public class AddAgentDialog extends JDialog {
             try {
                 get();
                 AppGui.getAgentTableModel().addData(agentToAdd);
+                AppGui.getAssignmentTableModel().addAgentString(agentToAdd.getId(),
+                        agentToAdd.getName() + ", " + agentToAdd.getSpecialPower() + ", " + agentToAdd.getRank());
             } catch (ExecutionException ex) {
                 logger.error("Error while executing addAgent - Agent: {}" , agentToAdd, ex.getCause());
                 JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogAddFailed"),
