@@ -88,12 +88,11 @@ public class AppGui {
         agentTableModel = new AgentTableModel();
 
         agentTable = new JTable(agentTableModel);
+        agentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         assignmentTable = new JTable(assignmentTableModel);
+        assignmentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         missionTable = new JTable(missionTableModel);
-    }
-
-    public static ResourceBundle getRb() {
-        return rb;
+        missionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     }
 
     public static AgentManager getAgentManager() {
@@ -187,28 +186,38 @@ public class AppGui {
         deleteAgentButton.addActionListener((ActionEvent e) -> deleteAgent());
 
         listAllAgentsButton.addActionListener((ActionEvent e) -> {
-                    FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-                    sw.setArgs(new Object[] { "findAllAgents" });
-                    sw.execute();
-                });
+            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
+            sw.setArgs(new Object[]{"findAllAgents"});
+            sw.execute();
+        });
 
         listAliveAgentsButton.addActionListener((ActionEvent e) -> {
-                    FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-                    sw.setArgs(new Object[] { "findAgentsByAlive", aliveCheckBox.isSelected() });
-                    sw.execute();
-                });
+            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
+            sw.setArgs(new Object[] { "findAgentsByAlive", aliveCheckBox.isSelected() });
+            sw.execute();
+        });
 
         listSpPowAgentsButton.addActionListener((ActionEvent e) -> {
-                    FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-                    sw.setArgs(new Object[] { "findAgentsBySpecialPower", spPowerField.getText() });
-                    sw.execute();
-                });
+            if (spPowerField.getText() == null || spPowerField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("listAgentsBySpPow"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
+            sw.setArgs(new Object[]{"findAgentsBySpecialPower", spPowerField.getText()});
+            sw.execute();
+        });
 
         listRankButton.addActionListener((ActionEvent e) -> {
-                    FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-                    sw.setArgs(new Object[] { "findAgentsByRank", rankSpinner.getValue() });
-                    sw.execute();
-                });
+            if (rankSpinner.getValue() == null || ((int) rankSpinner.getValue() <= 0)) {
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("listAgentsByRank"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
+            sw.setArgs(new Object[]{"findAgentsByRank", rankSpinner.getValue()});
+            sw.execute();
+        });
     }
 
     private void createAddAgentDialog() {
@@ -270,6 +279,11 @@ public class AppGui {
         });
 
         listMinAgRkMissionsButton.addActionListener((ActionEvent e) -> {
+            if (minAgRankSpinner.getValue() == null || ((int) minAgRankSpinner.getValue() <= 0)) {
+                JOptionPane.showMessageDialog(mainPanel, rb.getString("listMissionsByMinAgRank"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             FindMissionsSwingWorker swingWorker = new FindMissionsSwingWorker();
             swingWorker.setArgs(new Object[]{ "findMissionsByMinAgRank", minAgRankSpinner.getValue() });
             swingWorker.execute();
@@ -351,11 +365,16 @@ public class AppGui {
         if (assignmentTable.getSelectedRow() < 0) {
             return;
         }
-        Long assignmentToEditId = assignmentTableModel.getAssignmentId(
-                assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow()));
+        int selectedIndex = assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow());
+        Long assignmentToEditId = assignmentTableModel.getAssignmentId(selectedIndex);
+        if (assignmentTableModel.isEnded(selectedIndex)) {
+            JOptionPane.showMessageDialog(mainPanel, rb.getString("editEndedAssignment"),
+                    rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
         EditAssignmentDialog editAssignmentDialog = new EditAssignmentDialog(assignmentToEditId,
-                assignmentTable.convertColumnIndexToModel(missionTable.getSelectedRow()));
+                assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow()));
         editAssignmentDialog.setTitle(rb.getString("editAssignmentDialogTitle"));
         editAssignmentDialog.pack();
         editAssignmentDialog.setVisible(true);
@@ -382,13 +401,18 @@ public class AppGui {
         if (assignmentTable.getSelectedRow() < 0) {
             return;
         }
+        int selectedTableIndex = assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow());
+        if (assignmentTableModel.isEnded(selectedTableIndex)) {
+            JOptionPane.showMessageDialog(mainPanel, rb.getString("endEndedAssignment"),
+                    rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("endQuestion"),
                 rb.getString("endAssignmentTitle"), JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.NO_OPTION) {
             return;
         }
         EndAssignmentSwingWorker swingWorker = new EndAssignmentSwingWorker();
-        int selectedTableIndex = assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow());
         Long assignmentToEnd = assignmentTableModel.getAssignmentId(selectedTableIndex);
         swingWorker.setAssignmentToEndId(assignmentToEnd);
         swingWorker.setAssignmentTableIndex(selectedTableIndex);

@@ -8,10 +8,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 
 public class AddAgentDialog extends JDialog {
     private final static Logger logger = LoggerFactory.getLogger(AddAgentDialog.class);
+    private Locale locale = Locale.getDefault();
+    private ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
 
     private JPanel contentPane;
     private JButton buttonOK, buttonCancel;
@@ -41,16 +45,16 @@ public class AddAgentDialog extends JDialog {
 
     private void onOK() {
         if (nameField.getText() == null || nameField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogNameWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane, rb.getString("agentDialogNameWarning"),
+                    rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         } else if (specialPowerField.getText() == null || specialPowerField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogSpPowerWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane, rb.getString("agentDialogSpPowerWarning"),
+                    rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         } else if (rankSpinner.getValue() == null || ((int) rankSpinner.getValue()) < 1) {
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogRankWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane, rb.getString("agentDialogRankWarning"),
+                    rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -81,8 +85,8 @@ public class AddAgentDialog extends JDialog {
                         agentToAdd.getName() + ", " + agentToAdd.getSpecialPower() + ", " + agentToAdd.getRank());
             } catch (ExecutionException ex) {
                 logger.error("Error while executing addAgent - Agent: {}" , agentToAdd, ex.getCause());
-                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("agentDialogAddFailed"),
-                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPane, rb.getString("agentDialogAddFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             } catch (InterruptedException ex) {
                 //left blank intentionally, this should never happen
             }

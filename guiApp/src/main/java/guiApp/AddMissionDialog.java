@@ -7,10 +7,14 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
 
 public class AddMissionDialog extends JDialog {
     private final static Logger logger = LoggerFactory.getLogger(AddMissionDialog.class);
+    private Locale locale = Locale.getDefault();
+    private ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
 
     private JPanel contentPane;
     private JButton buttonOK, buttonCancel;
@@ -41,20 +45,28 @@ public class AddMissionDialog extends JDialog {
 
     private void onOK() {
         if (nameField.getText() == null || nameField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("missionDialogNameWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane,
+                    rb.getString("missionDialogNameWarning"),
+                    rb.getString("errorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
             return;
         } else if (taskField.getText() == null || taskField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("missionDialogTaskWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane,
+                    rb.getString("missionDialogTaskWarning"),
+                    rb.getString("errorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
             return;
         } else if (placeField.getText() == null  || placeField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("missionDialogPlaceWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane,
+                    rb.getString("missionDialogPlaceWarning"),
+                    rb.getString("errorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
             return;
         } else if (minAgRankSpinner.getValue() == null || ((int) minAgRankSpinner.getValue()) < 1) {
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("missionDialogMinAgRankWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane,
+                    rb.getString("missionDialogMinAgRankWarning"),
+                    rb.getString("errorDialogTitle"),
+                    JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -87,8 +99,10 @@ public class AddMissionDialog extends JDialog {
                                 + missionToAdd.getPlace() + ", " + missionToAdd.getMinAgentRank() );
             } catch (ExecutionException ex) {
                 logger.error("Error while executing addMission - Mission: {}" , missionToAdd, ex.getCause());
-                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("missionDialogAddFailed"),
-                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPane,
+                        rb.getString("missionDialogAddFailed"),
+                        rb.getString("errorDialogTitle"),
+                        JOptionPane.ERROR_MESSAGE);
             } catch (InterruptedException ex) {
                 //left blank intentionally, this should never happen
             }

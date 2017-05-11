@@ -1,11 +1,12 @@
 package guiApp.tableModels;
 
 import cz.muni.fi.pv168.db_backend.backend.Agent;
-import guiApp.AppGui;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * TODO: create javadoc
@@ -13,6 +14,8 @@ import java.util.List;
  * @author Dominik Frantisek Bucik
  */
 public class AssignmentAgentTableModel extends AbstractTableModel {
+    private Locale locale = Locale.getDefault();
+    private ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
     private List<Agent> data = new ArrayList<>();
 
     @Override
@@ -44,11 +47,11 @@ public class AssignmentAgentTableModel extends AbstractTableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return AppGui.getRb().getString("nameLabel");
+                return rb.getString("nameLabel");
             case 1:
-                return AppGui.getRb().getString("spPowerLabel");
+                return rb.getString("spPowerLabel");
             case 2:
-                return AppGui.getRb().getString("rankLabel");
+                return rb.getString("rankLabel");
             default:
                 throw new IllegalArgumentException("Invalid columnIndex");
         }

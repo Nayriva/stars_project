@@ -12,11 +12,17 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class EditAssignmentDialog extends JDialog {
     private final static Logger logger = LoggerFactory.getLogger(EditAssignmentDialog.class);
+    private Locale locale = Locale.getDefault();
+    private ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
 
     private JPanel contentPane;
     private JButton buttonOK, buttonCancel;
@@ -35,21 +41,21 @@ public class EditAssignmentDialog extends JDialog {
         try {
             assignment = AppGui.getAssignmentManager().findAssignmentById(assignmentId);
             if (assignment == null) {
-                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("dialogEntityNotFound"),
-                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPane, rb.getString("dialogEntityNotFound"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
             GetTableDataSwingWorker swingWorker = new GetTableDataSwingWorker();
             swingWorker.execute();
         } catch (ServiceFailureException ex) {
             logger.error("Service failure", ex);
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("dialogServiceFailure"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogServiceFailure"),
+                    rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         } catch (TableDataException ex) {
             logger.error("TableDataException", ex);
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("dialogTableDataFailure"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogTableDataFailure"),
+                    rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -81,25 +87,30 @@ public class EditAssignmentDialog extends JDialog {
     }
 
     private void onOK() {
-        Mission mission = null;
-        Agent agent = null;
-        Long missionId, agentId;
-        if (agentTable.getSelectedRow() < 0) {
-            agentId = assignment.getId();
-        } else {
-            agent = agentTableModel.getAgent(agentTable.convertColumnIndexToModel(agentTable.getSelectedRow()));
+        String agentParts[] = agentTextField.getText().split(", ");
+        String missionParts[] = missionTextField.getText().split(", ");
+        Long missionId = assignment.getMission();
+        Long agentId = assignment.getAgent();
+        int agentRank= Integer.parseInt(agentParts[2]);
+        int missionMinAgRank = Integer.parseInt(missionParts[3]);
+
+        if (agentTable.getSelectedRow() >= 0) {
+            Agent agent = agentTableModel.getAgent(
+                    agentTable.convertColumnIndexToModel(agentTable.getSelectedRow()));
             agentId = agent.getId();
+            agentRank = agent.getRank();
         }
 
-        if (missionTable.getSelectedRow() < 0) {
-            missionId = assignment.getMission();
-        } else {
-            mission = missionTableModel.getMission(missionTable.convertColumnIndexToModel(missionTable.getSelectedRow()));
+        if (missionTable.getSelectedRow() >= 0) {
+            Mission mission =  missionTableModel.getMission(
+                    missionTable.convertColumnIndexToModel(missionTable.getSelectedRow()));
             missionId = mission.getId();
+            missionMinAgRank = mission.getMinAgentRank();
         }
-        if (mission != null && agent != null && mission.getMinAgentRank() > agent.getRank()) {
-            JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("assignmentRankWarning"),
-                    AppGui.getRb().getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
+
+        if (missionMinAgRank > agentRank) {
+            JOptionPane.showMessageDialog(contentPane, rb.getString("assignmentEditRankWarning"),
+                    rb.getString("errorDialogTitle"), JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -109,8 +120,8 @@ public class EditAssignmentDialog extends JDialog {
                     .agent(agentId).start(assignment.getStart()).end(assignment.getEnd()).build());
             swingWorker.setAssignmentIndex(assignmentIndex);
             swingWorker.execute();
-            dispose();
         }
+        dispose();
     }
 
     private class EditAssignmentSwingWorker extends SwingWorker<Void, Void> {
@@ -132,8 +143,8 @@ public class EditAssignmentDialog extends JDialog {
                 AppGui.getAssignmentTableModel().editData(assignmentIndex, assignmentToEdit);
             }  catch (ExecutionException ex) {
                 logger.error("Error while executing editAssignment - Assignment: {}" , assignmentToEdit, ex.getCause());
-                JOptionPane.showMessageDialog(contentPane, AppGui.getRb().getString("assignmentDialogEditFailed"),
-                        AppGui.getRb().getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(contentPane, rb.getString("assignmentDialogEditFailed"),
+                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             } catch (InterruptedException ex) {
                 //left blank intentionally, this should never happen
             }
@@ -158,7 +169,11 @@ public class EditAssignmentDialog extends JDialog {
 
         @Override
         protected Void doInBackground() throws Exception {
+            List<Assignment> active = AppGui.getAssignmentManager().findActiveAssignments();
+            List<Long> activeAssignmentAgId = active.stream().map(Assignment::getAgent).collect(Collectors.toList());
             List<Agent> agents = AppGui.getAgentManager().findAgentsByAlive(true);
+            agents.removeIf((agent) -> activeAssignmentAgId.contains(agent.getId()));
+
             List<Mission> missions = AppGui.getMissionManager().findMissionsByFinished(false);
             missions.removeIf(Mission::isSuccessful);
             agentTableModel.addData(agents);

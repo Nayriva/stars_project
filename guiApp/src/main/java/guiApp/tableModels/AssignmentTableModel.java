@@ -1,23 +1,21 @@
 package guiApp.tableModels;
 
 import cz.muni.fi.pv168.db_backend.backend.Assignment;
-import guiApp.AppGui;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.table.AbstractTableModel;
 import java.io.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by nayriva on 2.5.2017.
  */
 public class AssignmentTableModel extends AbstractTableModel {
     private final static Logger logger = LoggerFactory.getLogger(AbstractTableModel.class);
+    private Locale locale = Locale.getDefault();
+    private ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
 
     private List<Assignment> data = new ArrayList<>();
     private Map<Long, String> missions = new HashMap<>();
@@ -70,13 +68,13 @@ public class AssignmentTableModel extends AbstractTableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return AppGui.getRb().getString("agentLabel");
+                return rb.getString("agentLabel");
             case 1:
-                return AppGui.getRb().getString("missionLabel");
+                return rb.getString("missionLabel");
             case 2:
-                return AppGui.getRb().getString("startLabel");
+                return rb.getString("startLabel");
             case 3:
-                return AppGui.getRb().getString("endLabel");
+                return rb.getString("endLabel");
             default:
                 throw new IllegalArgumentException("Invalid columnIndex");
         }
@@ -107,8 +105,6 @@ public class AssignmentTableModel extends AbstractTableModel {
     }
 
     public void deleteData(int index) {
-        missions.remove(data.get(index).getMission());
-        agents.remove(data.get(index).getAgent());
         data.remove(index);
         int lastRow = data.size() - 1;
         fireTableRowsDeleted(lastRow, lastRow);
@@ -124,6 +120,10 @@ public class AssignmentTableModel extends AbstractTableModel {
         data.add(assignment);
         int lastRow = data.size() - 1;
         fireTableRowsInserted(lastRow, lastRow);
+    }
+
+    public boolean isEnded(int index) {
+        return data.get(index).getEnd() != null;
     }
 
     public void addMissionString(Long missionId, String missionString) {

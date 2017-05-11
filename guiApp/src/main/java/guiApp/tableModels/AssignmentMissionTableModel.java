@@ -1,11 +1,12 @@
 package guiApp.tableModels;
 
 import cz.muni.fi.pv168.db_backend.backend.Mission;
-import guiApp.AppGui;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * TODO: create javadoc
@@ -13,6 +14,8 @@ import java.util.List;
  * @author Dominik Frantisek Bucik
  */
 public class AssignmentMissionTableModel extends AbstractTableModel {
+    private Locale locale = Locale.getDefault();
+    private ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
     private List<Mission> data = new ArrayList<>();
 
     @Override
@@ -46,13 +49,13 @@ public class AssignmentMissionTableModel extends AbstractTableModel {
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
-                return AppGui.getRb().getString("nameLabel");
+                return rb.getString("nameLabel");
             case 1:
-                return AppGui.getRb().getString("taskLabel");
+                return rb.getString("taskLabel");
             case 2:
-                return AppGui.getRb().getString("placeLabel");
+                return rb.getString("placeLabel");
             case 3:
-                return AppGui.getRb().getString("minAgRankLabel");
+                return rb.getString("minAgRankLabel");
             default:
                 throw new IllegalArgumentException("Invalid columnIndex");
         }
@@ -74,6 +77,15 @@ public class AssignmentMissionTableModel extends AbstractTableModel {
 
     public Mission getMission(int index) {
         return data.get(index);
+    }
+
+    public int getMissionMinAgRank(Long id) {
+        for (Mission m: data) {
+            if (m.getId().equals(id)) {
+                return m.getMinAgentRank();
+            }
+        }
+        return -1;
     }
 
     public void addData(List<Mission> missions) {

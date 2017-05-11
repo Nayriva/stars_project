@@ -36,7 +36,7 @@
                 </constraints>
                 <properties>
                   <dividerLocation value="196"/>
-                  <lastDividerLocation value="200"/>
+                  <lastDividerLocation value="-1"/>
                 </properties>
                 <border type="none"/>
                 <children>
@@ -431,7 +431,7 @@
                 </constraints>
                 <properties>
                   <dividerLocation value="200"/>
-                  <lastDividerLocation value="162"/>
+                  <lastDividerLocation value="-1"/>
                 </properties>
                 <border type="none"/>
                 <children>
