@@ -5,14 +5,14 @@ import cz.muni.fi.pv168.db_backend.backend.Assignment;
 import cz.muni.fi.pv168.db_backend.backend.Mission;
 import cz.muni.fi.pv168.db_backend.common.AssignmentBuilder;
 import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
-import guiApp.tableModels.AssignmentAgentTableModel;
-import guiApp.tableModels.AssignmentMissionTableModel;
+import guiApp.tablesResources.AssignmentAgentTableModel;
+import guiApp.tablesResources.AssignmentMissionTableModel;
+import guiApp.tablesResources.LocalizedHeaderRendered;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -60,7 +60,11 @@ public class EditAssignmentDialog extends JDialog {
         }
 
         missionTable.setModel(missionTableModel);
+        missionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        missionTable.getTableHeader().setDefaultRenderer(new LocalizedHeaderRendered(rb));
         agentTable.setModel(agentTableModel);
+        agentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        agentTable.getTableHeader().setDefaultRenderer(new LocalizedHeaderRendered(rb));
 
         missionTextField.setText(AppGui.getAssignmentTableModel().getMissions().get(assignment.getMission()));
         agentTextField.setText(AppGui.getAssignmentTableModel().getAgents().get(assignment.getAgent()));

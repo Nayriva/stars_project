@@ -1,22 +1,40 @@
-package guiApp.tableModels;
+package guiApp.tablesResources;
 
 import cz.muni.fi.pv168.db_backend.backend.Agent;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
+import java.util.function.Function;
 
 /**
  * Table model for AgentTable.
+ *
  * Created by nayriva on 2.5.2017.
  */
 public class AgentTableModel extends AbstractTableModel {
-    private Locale locale = Locale.getDefault();
-    private ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
-
     private List<Agent> data = new ArrayList<>();
+
+    private enum Column {
+        NAME(String.class, Agent::getName),
+        SPECIAL_POWER(String.class, Agent::getSpecialPower),
+        ALIVE(Boolean.class, Agent::isAlive),
+        RANK(Integer.class, Agent::getRank);
+
+        private Column(Class<?> columnType, Function<Agent, Object> valueExtractor) {
+            this.columnType = columnType;
+            this.valueExtractor = valueExtractor;
+        }
+
+        private final Class columnType;
+        private final Function<Agent, Object> valueExtractor;
+    }
+
+    private Column getColumn(int columnIndex) {
+        return Column.values() [columnIndex];
+    }
+
+
 
     @Override
     public int getRowCount() {
@@ -25,55 +43,23 @@ public class AgentTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 4;
+        return Column.values().length;
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Agent agent = data.get(rowIndex);
-        switch (columnIndex) {
-            case 0:
-                return agent.getName();
-            case 1:
-                return agent.getSpecialPower();
-            case 2:
-                return agent.isAlive();
-            case 3:
-                return agent.getRank();
-            default:
-                throw new IllegalArgumentException("Invalid rowIndex");
-        }
+        return getColumn(columnIndex).valueExtractor.apply(agent);
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return rb.getString("nameLabel");
-            case 1:
-                return rb.getString("spPowerLabel");
-            case 2:
-                return rb.getString("aliveLabel");
-            case 3:
-                return rb.getString("rankLabel");
-            default:
-                throw new IllegalArgumentException("Invalid columnIndex");
-        }
+        return getColumn(columnIndex).name();
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-            case 1:
-                return String.class;
-            case 2:
-                return Boolean.class;
-            case 3:
-                return Integer.class;
-            default:
-                throw new IllegalArgumentException("Invalid columnIndex");
-        }
+        return getColumn(columnIndex).columnType;
     }
 
     public void editData(int index, Agent agent) {

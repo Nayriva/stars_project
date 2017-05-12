@@ -3,9 +3,10 @@ package guiApp;
 import cz.muni.fi.pv168.db_backend.backend.*;
 import cz.muni.fi.pv168.db_backend.Main;
 import cz.muni.fi.pv168.db_backend.common.DBUtils;
-import guiApp.tableModels.AgentTableModel;
-import guiApp.tableModels.AssignmentTableModel;
-import guiApp.tableModels.MissionTableModel;
+import guiApp.tablesResources.AgentTableModel;
+import guiApp.tablesResources.AssignmentTableModel;
+import guiApp.tablesResources.LocalizedHeaderRendered;
+import guiApp.tablesResources.MissionTableModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +14,8 @@ import javax.sql.DataSource;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -89,10 +88,15 @@ public class AppGui {
 
         agentTable = new JTable(agentTableModel);
         agentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        agentTable.getTableHeader().setDefaultRenderer(new LocalizedHeaderRendered(rb));
+
         assignmentTable = new JTable(assignmentTableModel);
         assignmentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        assignmentTable.getTableHeader().setDefaultRenderer(new LocalizedHeaderRendered(rb));
+
         missionTable = new JTable(missionTableModel);
         missionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        missionTable.getTableHeader().setDefaultRenderer(new LocalizedHeaderRendered(rb));
     }
 
     public static AgentManager getAgentManager() {

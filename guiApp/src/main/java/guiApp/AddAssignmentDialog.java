@@ -5,8 +5,9 @@ import cz.muni.fi.pv168.db_backend.backend.Assignment;
 import cz.muni.fi.pv168.db_backend.backend.Mission;
 import cz.muni.fi.pv168.db_backend.common.AssignmentBuilder;
 
-import guiApp.tableModels.AssignmentAgentTableModel;
-import guiApp.tableModels.AssignmentMissionTableModel;
+import guiApp.tablesResources.AssignmentAgentTableModel;
+import guiApp.tablesResources.AssignmentMissionTableModel;
+import guiApp.tablesResources.LocalizedHeaderRendered;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +48,10 @@ public class AddAssignmentDialog extends JDialog {
 
         missionTable.setModel(missionTableModel);
         missionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        missionTable.getTableHeader().setDefaultRenderer(new LocalizedHeaderRendered(rb));
         agentTable.setModel(agentTableModel);
         agentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        agentTable.getTableHeader().setDefaultRenderer(new LocalizedHeaderRendered(rb));
 
         buttonOK.addActionListener((ActionEvent e) -> onOK());
 

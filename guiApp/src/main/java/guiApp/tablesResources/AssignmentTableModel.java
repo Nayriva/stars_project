@@ -1,4 +1,4 @@
-package guiApp.tableModels;
+package guiApp.tablesResources;
 
 import cz.muni.fi.pv168.db_backend.backend.Assignment;
 import org.slf4j.Logger;
@@ -8,15 +8,14 @@ import javax.swing.table.AbstractTableModel;
 import java.io.*;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Function;
 
-/**
+/** Assignment table model
+ *
  * Created by nayriva on 2.5.2017.
  */
 public class AssignmentTableModel extends AbstractTableModel {
     private final static Logger logger = LoggerFactory.getLogger(AbstractTableModel.class);
-    private Locale locale = Locale.getDefault();
-    private ResourceBundle rb = ResourceBundle.getBundle("guiApp.localization", locale);
-
     private List<Assignment> data = new ArrayList<>();
     private Map<Long, String> missions = new HashMap<>();
     private Map<Long, String> agents = new HashMap<>();
@@ -37,6 +36,25 @@ public class AssignmentTableModel extends AbstractTableModel {
         }
     }
 
+    private enum Column {
+        AGENT(String.class, Assignment::getAgent),
+        MISSION(String.class, Assignment::getMission),
+        START(LocalDate.class, Assignment::getStart),
+        END(LocalDate.class, Assignment::getEnd);
+
+        Column(Class columnType, Function<Assignment, Object> valueExtractor) {
+            this.columnType = columnType;
+            this.valueExtractor = valueExtractor;
+        }
+
+        private final Class columnType;
+        private final Function<Assignment, Object> valueExtractor;
+    }
+
+    private Column getColumn(int columnIndex) {
+        return Column.values()[columnIndex];
+    }
+
     @Override
     public int getRowCount() {
         return data.size();
@@ -44,54 +62,34 @@ public class AssignmentTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 4;
+        return Column.values().length;
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Assignment assignment = data.get(rowIndex);
         switch (columnIndex) {
-            case 0:
-                return agents.get(assignment.getAgent());
-            case 1:
-                return missions.get(assignment.getMission());
-            case 2:
-                return assignment.getStart();
-            case 3:
-                return assignment.getEnd();
+            case 0: {
+                Long id = (Long) getColumn(columnIndex).valueExtractor.apply(assignment);
+                return agents.get(id);
+            }
+            case 1: {
+                Long id = (Long) getColumn(columnIndex).valueExtractor.apply(assignment);
+                return missions.get(id);
+            }
             default:
-                throw new IllegalArgumentException("Invalid rowIndex");
+                return getColumn(columnIndex).valueExtractor.apply(assignment);
         }
     }
 
     @Override
     public String getColumnName(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-                return rb.getString("agentLabel");
-            case 1:
-                return rb.getString("missionLabel");
-            case 2:
-                return rb.getString("startLabel");
-            case 3:
-                return rb.getString("endLabel");
-            default:
-                throw new IllegalArgumentException("Invalid columnIndex");
-        }
+        return getColumn(columnIndex).name();
     }
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        switch (columnIndex) {
-            case 0:
-            case 1:
-                return String.class;
-            case 2:
-            case 3:
-                return LocalDate.class;
-            default:
-                throw new IllegalArgumentException("Invalid columnIndex");
-        }
+        return getColumn(columnIndex).columnType;
     }
 
     public void editData(int index, Assignment assignment) {
