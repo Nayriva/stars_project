@@ -66,6 +66,8 @@ public class AppGui {
     private static AssignmentTableModel assignmentTableModel;
     private static MissionTableModel missionTableModel;
 
+    private static Object[] dialogLocalizedOptions;
+
     public AppGui() {
         initializeAgentComponents();
         initializeMissionComponents();
@@ -132,6 +134,7 @@ public class AppGui {
 
         locale = Locale.getDefault();
         rb = ResourceBundle.getBundle("guiApp.localization", locale);
+        dialogLocalizedOptions = new Object[] { rb.getString("OK"), rb.getString("cancel") };
         prepareDataSourceAndDb();
 
         JFrame frame = new JFrame(rb.getString("mainTitle"));
@@ -249,8 +252,9 @@ public class AppGui {
         if (agentTable.getSelectedRow() < 0) {
             return;
         }
-        int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("deleteQuestion"),
-                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION);
+        int result = JOptionPane.showOptionDialog(mainPanel, rb.getString("deleteQuestion"),
+                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE, null, dialogLocalizedOptions, dialogLocalizedOptions[1]);
         if (result == JOptionPane.NO_OPTION) {
             return;
         }
@@ -319,8 +323,9 @@ public class AppGui {
         if (missionTable.getSelectedRow() < 0) {
             return;
         }
-        int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("deleteQuestion"),
-                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION);
+        int result = JOptionPane.showOptionDialog(mainPanel, rb.getString("deleteQuestion"),
+                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE, null, dialogLocalizedOptions, dialogLocalizedOptions[1]);
         if (result == JOptionPane.NO_OPTION) {
             return;
         }
@@ -388,8 +393,9 @@ public class AppGui {
         if (assignmentTable.getSelectedRow() < 0) {
             return;
         }
-        int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("deleteQuestion"),
-                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION);
+        int result = JOptionPane.showOptionDialog(mainPanel, rb.getString("deleteQuestion"),
+                rb.getString("deleteEntryTitle"), JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE, null, dialogLocalizedOptions, dialogLocalizedOptions[1]);
         if (result == JOptionPane.NO_OPTION) {
             return;
         }
@@ -411,8 +417,9 @@ public class AppGui {
                     rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
-        int result = JOptionPane.showConfirmDialog(mainPanel, rb.getString("endQuestion"),
-                rb.getString("endAssignmentTitle"), JOptionPane.YES_NO_OPTION);
+        int result = JOptionPane.showOptionDialog(mainPanel, rb.getString("endQuestion"),
+                rb.getString("endAssignmentTitle"), JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE, null, dialogLocalizedOptions, dialogLocalizedOptions[1]);
         if (result == JOptionPane.NO_OPTION) {
             return;
         }
