@@ -120,6 +120,10 @@ public class AssignmentTableModel extends AbstractTableModel {
         fireTableRowsInserted(lastRow, lastRow);
     }
 
+    public Assignment getAssignment(int assignmentIndex) {
+        return data.get(assignmentIndex);
+    }
+
     public boolean isEnded(int index) {
         return data.get(index).getEnd() != null;
     }

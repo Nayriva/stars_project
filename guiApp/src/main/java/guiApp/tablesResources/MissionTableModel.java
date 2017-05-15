@@ -89,4 +89,8 @@ public class MissionTableModel extends AbstractTableModel {
         int lastRow = data.size() - 1;
         fireTableRowsInserted(lastRow, lastRow);
     }
+
+    public Mission getMission(int missionIndex) {
+        return data.get(missionIndex);
+    }
 }

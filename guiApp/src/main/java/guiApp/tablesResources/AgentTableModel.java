@@ -89,4 +89,8 @@ public class AgentTableModel extends AbstractTableModel {
         int lastRow = data.size() - 1;
         fireTableRowsInserted(lastRow, lastRow);
     }
+
+    public Agent getAgent(int agentIndex) {
+        return data.get(agentIndex);
+    }
 }

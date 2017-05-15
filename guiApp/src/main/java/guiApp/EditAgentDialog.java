@@ -35,20 +35,13 @@ public class EditAgentDialog extends JDialog {
     public EditAgentDialog(Long agentId, int agentIndex) {
         this.agentId = agentId;
         this.agentIndex = agentIndex;
-        try {
-            agent = AppGui.getAgentManager().findAgentById(agentId);
-            if (agent == null) {
-                JOptionPane.showMessageDialog(contentPane, rb.getString("dialogEntityNotFound"),
-                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            this.oldAlive = agent.isAlive();
-        } catch (ServiceFailureException ex) {
-            logger.error("Service failure", ex);
-            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogServiceFailure"),
+        agent = AppGui.getAgentTableModel().getAgent(agentIndex);
+        if (agent == null) {
+            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogEntityNotFound"),
                     rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
+        oldAlive = agent.isAlive();
         setInitialValues();
 
         setContentPane(contentPane);

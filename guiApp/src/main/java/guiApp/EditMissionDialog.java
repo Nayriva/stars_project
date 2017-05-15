@@ -27,25 +27,16 @@ public class EditMissionDialog extends JDialog {
     private JTextField nameField, taskField, placeField;
     private JSpinner minAgRankSpinner;
 
-    private Long missionId;
     private int missionIndex;
     private Mission mission;
     private boolean oldFinished;
     private boolean oldSuccessful;
 
-    public EditMissionDialog(Long missionId, int missionIndex) {
-        this.missionId = missionId;
+    public EditMissionDialog(int missionIndex) {
         this.missionIndex = missionIndex;
-        try {
-            mission = AppGui.getMissionManager().findMissionById(missionId);
-            if (mission == null) {
-                JOptionPane.showMessageDialog(contentPane, rb.getString("dialogEntityNotFound"),
-                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-        } catch (ServiceFailureException ex) {
-            logger.error("Service failure", ex);
-            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogServiceFailure"),
+        mission = AppGui.getMissionTableModel().getMission(missionIndex);
+        if (mission == null || mission.getId() == null) {
+            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogEntityNotFound"),
                     rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -101,7 +92,7 @@ public class EditMissionDialog extends JDialog {
                  || minAgRank != mission.getMinAgentRank() || successfulCheckBox.isSelected() != mission.isSuccessful()
                 || finishedCheckBox.isSelected() != mission.isFinished()) {
             EditMissionSwingWorker swingWorker= new EditMissionSwingWorker();
-            swingWorker.setMissionToEdit(new MissionBuilder().id(missionId).name(name).task(task).place(place)
+            swingWorker.setMissionToEdit(new MissionBuilder().id(mission.getId()).name(name).task(task).place(place)
                     .successful(successfulCheckBox.isSelected()).finished(finishedCheckBox.isSelected())
                     .minAgentRank(minAgRank).build());
             swingWorker.execute();

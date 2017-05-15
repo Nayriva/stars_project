@@ -309,10 +309,7 @@ public class AppGui {
         if (missionTable.getSelectedRow() < 0) {
             return;
         }
-        Long missionToEditId = missionTableModel.getMissionId(
-                missionTable.convertColumnIndexToModel(missionTable.getSelectedRow()));
-
-        EditMissionDialog editMissionDialog = new EditMissionDialog(missionToEditId,
+        EditMissionDialog editMissionDialog = new EditMissionDialog(
                 missionTable.convertColumnIndexToModel(missionTable.getSelectedRow()));
         editMissionDialog.setTitle(rb.getString("editMissionDialogTitle"));
         editMissionDialog.pack();
@@ -375,14 +372,13 @@ public class AppGui {
             return;
         }
         int selectedIndex = assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow());
-        Long assignmentToEditId = assignmentTableModel.getAssignmentId(selectedIndex);
         if (assignmentTableModel.isEnded(selectedIndex)) {
             JOptionPane.showMessageDialog(mainPanel, rb.getString("editEndedAssignment"),
                     rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        EditAssignmentDialog editAssignmentDialog = new EditAssignmentDialog(assignmentToEditId,
+        EditAssignmentDialog editAssignmentDialog = new EditAssignmentDialog(
                 assignmentTable.convertColumnIndexToModel(assignmentTable.getSelectedRow()));
         editAssignmentDialog.setTitle(rb.getString("editAssignmentDialogTitle"));
         editAssignmentDialog.pack();

@@ -35,29 +35,16 @@ public class EditAssignmentDialog extends JDialog {
     private AssignmentMissionTableModel missionTableModel = new AssignmentMissionTableModel();
     private AssignmentAgentTableModel agentTableModel = new AssignmentAgentTableModel();
 
-    public EditAssignmentDialog(Long assignmentId, int assignmentIndex) {
-        this.assignmentId = assignmentId;
+    public EditAssignmentDialog(int assignmentIndex) {
         this.assignmentIndex = assignmentIndex;
-        try {
-            assignment = AppGui.getAssignmentManager().findAssignmentById(assignmentId);
-            if (assignment == null) {
-                JOptionPane.showMessageDialog(contentPane, rb.getString("dialogEntityNotFound"),
-                        rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            GetTableDataSwingWorker swingWorker = new GetTableDataSwingWorker();
-            swingWorker.execute();
-        } catch (ServiceFailureException ex) {
-            logger.error("Service failure", ex);
-            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogServiceFailure"),
-                    rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
-            return;
-        } catch (TableDataException ex) {
-            logger.error("TableDataException", ex);
-            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogTableDataFailure"),
+        assignment = AppGui.getAssignmentTableModel().getAssignment(assignmentIndex);
+        if (assignment == null) {
+            JOptionPane.showMessageDialog(contentPane, rb.getString("dialogEntityNotFound"),
                     rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             return;
         }
+        GetTableDataSwingWorker swingWorker = new GetTableDataSwingWorker();
+        swingWorker.execute();
 
         missionTable.setModel(missionTableModel);
         missionTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
