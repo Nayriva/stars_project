@@ -125,43 +125,6 @@ public class AppGui {
         return missionTableModel;
     }
 
-    public static void main(String[] args) {
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-        locale = Locale.getDefault();
-        rb = ResourceBundle.getBundle("guiApp.localization", locale);
-        dialogLocalizedOptions = new Object[] { rb.getString("OK"), rb.getString("cancel") };
-        prepareDataSourceAndDb();
-
-        JFrame frame = new JFrame(rb.getString("mainTitle"));
-        frame.setContentPane(new AppGui().mainPanel);
-        frame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                try (ObjectOutputStream agentsOOS = new ObjectOutputStream(new FileOutputStream(
-                        "additionalResources/serialization/agentStrings.ser"));
-                     ObjectOutputStream missionsOOS = new ObjectOutputStream(new FileOutputStream(
-                             "additionalResources/serialization/missionStrings.ser")))
-                {
-                    logger.debug("Serialization of hashmaps...");
-                    agentsOOS.writeObject(assignmentTableModel.getAgents());
-                    missionsOOS.writeObject(assignmentTableModel.getMissions());
-                    logger.debug("Serialization of hashmaps finished...");
-                } catch (IOException ex) {
-                    logger.error("Serialization of hashmaps failed", ex);
-                    System.exit(3);
-                }
-                System.exit(0);
-            }
-        });
-        frame.pack();
-        frame.setVisible(true);
-    }
-
     /**
      * Includes driver for DB, prepares datasource and managers.
      */
@@ -697,5 +660,42 @@ public class AppGui {
                     throw new IllegalArgumentException("Cannot parse operation");
             }
         }
+    }
+
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        locale = Locale.getDefault();
+        rb = ResourceBundle.getBundle("guiApp.localization", locale);
+        dialogLocalizedOptions = new Object[] { rb.getString("OK"), rb.getString("cancel") };
+        prepareDataSourceAndDb();
+
+        JFrame frame = new JFrame(rb.getString("mainTitle"));
+        frame.setContentPane(new AppGui().mainPanel);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try (ObjectOutputStream agentsOOS = new ObjectOutputStream(new FileOutputStream(
+                        "additionalResources/serialization/agentStrings.ser"));
+                     ObjectOutputStream missionsOOS = new ObjectOutputStream(new FileOutputStream(
+                             "additionalResources/serialization/missionStrings.ser")))
+                {
+                    logger.debug("Serialization of hashmaps...");
+                    agentsOOS.writeObject(assignmentTableModel.getAgents());
+                    missionsOOS.writeObject(assignmentTableModel.getMissions());
+                    logger.debug("Serialization of hashmaps finished...");
+                } catch (IOException ex) {
+                    logger.error("Serialization of hashmaps failed", ex);
+                    System.exit(3);
+                }
+                System.exit(0);
+            }
+        });
+        frame.pack();
+        frame.setVisible(true);
     }
 }

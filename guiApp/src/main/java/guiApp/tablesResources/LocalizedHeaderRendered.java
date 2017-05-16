@@ -23,6 +23,8 @@ public class LocalizedHeaderRendered extends DefaultTableCellRenderer {
     public Component getTableCellRendererComponent(JTable table, Object value,
                                                    boolean isSelected, boolean hasFocus, int row, int column) {
         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        setBorder(BorderFactory.createLineBorder(Color.black));
+        setBackground(Color.PINK);
         switch(table.getModel().getColumnName(column)) {
             case "NAME": setText(rs.getString("nameLabel"));
                 break;
