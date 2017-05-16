@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileOutputStream;
@@ -55,6 +56,7 @@ public class AppGui {
             listAllAssignmentsButton, listAssignmentsButton;
     private JTable assignmentTable;
     private JCheckBox activeCheckBox;
+    private JButton helpButton;
     //other
     private static DataSource ds;
     private static AgentManager agentManager;
@@ -80,6 +82,12 @@ public class AppGui {
             } else if (tabbedPane.getSelectedIndex() == 2) {
                 listAllAssignmentsButton.doClick();
             }
+        });
+
+        helpButton.addActionListener((ActionEvent e) -> {
+            JOptionPane.showMessageDialog(mainPanel, rb.getString("helpMessage"),
+                    rb.getString("helpTitle"),
+                    JOptionPane.INFORMATION_MESSAGE);
         });
     }
 
