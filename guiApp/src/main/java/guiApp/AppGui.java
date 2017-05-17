@@ -14,7 +14,6 @@ import javax.sql.DataSource;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.FileOutputStream;
@@ -30,6 +29,8 @@ import java.util.concurrent.*;
 
 
 /**
+ * Main class for GUI of application.
+ *
  * Created by nayriva on 27.4.2017.
  */
 public class AppGui {
@@ -62,7 +63,6 @@ public class AppGui {
     private static AgentManager agentManager;
     private static AssignmentManager assignmentManager;
     private static MissionManager missionManager;
-    private static Locale locale;
     private static ResourceBundle rb;
     private static AgentTableModel agentTableModel;
     private static AssignmentTableModel assignmentTableModel;
@@ -84,11 +84,11 @@ public class AppGui {
             }
         });
 
-        helpButton.addActionListener((ActionEvent e) -> {
-            JOptionPane.showMessageDialog(mainPanel, rb.getString("helpMessage"),
+        helpButton.addActionListener((ActionEvent e) -> JOptionPane.showMessageDialog(
+                mainPanel, rb.getString("helpMessage"),
                     rb.getString("helpTitle"),
-                    JOptionPane.INFORMATION_MESSAGE);
-        });
+                    JOptionPane.INFORMATION_MESSAGE)
+        );
     }
 
     private void createUIComponents() {
@@ -142,13 +142,10 @@ public class AppGui {
         missionManager = new MissionManagerImpl();
 
         try {
-            Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
             ds = Main.createDB();
             DBUtils.tryCreateTables(ds, Main.class.getResource("backend/createTables.sql"));
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-            System.exit(1);
         } catch (IOException | SQLException e) {
-            System.exit(2);
+            System.exit(1);
         }
 
         agentManager.setDataSource(ds);
@@ -164,15 +161,16 @@ public class AppGui {
         deleteAgentButton.addActionListener((ActionEvent e) -> deleteAgent());
 
         listAllAgentsButton.addActionListener((ActionEvent e) -> {
-            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-            sw.setArgs(new Object[]{"findAllAgents"});
-            sw.execute();
+            FindAgentsSwingWorker swingWorker = new FindAgentsSwingWorker();
+            swingWorker.setOperation("findAllAgents");
+            swingWorker.execute();
         });
 
         listAliveAgentsButton.addActionListener((ActionEvent e) -> {
-            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-            sw.setArgs(new Object[] { "findAgentsByAlive", aliveCheckBox.isSelected() });
-            sw.execute();
+            FindAgentsSwingWorker swingWorker = new FindAgentsSwingWorker();
+            swingWorker.setOperation("findAgentsByAlive");
+            swingWorker.setAlive(aliveCheckBox.isSelected());
+            swingWorker.execute();
         });
 
         listSpPowAgentsButton.addActionListener((ActionEvent e) -> {
@@ -181,9 +179,10 @@ public class AppGui {
                         rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-            sw.setArgs(new Object[]{"findAgentsBySpecialPower", spPowerField.getText()});
-            sw.execute();
+            FindAgentsSwingWorker swingWorker = new FindAgentsSwingWorker();
+            swingWorker.setOperation("findAgentsBySpecialPower");
+            swingWorker.setSpecialPower(spPowerField.getText());
+            swingWorker.execute();
         });
 
         listRankButton.addActionListener((ActionEvent e) -> {
@@ -192,9 +191,10 @@ public class AppGui {
                         rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
                 return;
             }
-            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-            sw.setArgs(new Object[]{"findAgentsByRank", rankSpinner.getValue()});
-            sw.execute();
+            FindAgentsSwingWorker swingWorker = new FindAgentsSwingWorker();
+            swingWorker.setOperation("findAgentsByRank");
+            swingWorker.setRank((int) rankSpinner.getValue());
+            swingWorker.execute();
         });
     }
 
@@ -246,14 +246,15 @@ public class AppGui {
 
         listAllMissionsButton.addActionListener((ActionEvent e) -> {
             FindMissionsSwingWorker swingWorker = new FindMissionsSwingWorker();
-            swingWorker.setArgs(new Object[]{ "findAllMissions" });
+            swingWorker.setOperation("findAllMissions");
             swingWorker.execute();
         });
 
         listSucFinMissionsButton.addActionListener((ActionEvent e) -> {
             FindMissionsSwingWorker swingWorker = new FindMissionsSwingWorker();
-            swingWorker.setArgs(new Object[]{ "findMissionsBySucFin", successfulCheckBox.isSelected(),
-                    finishedCheckBox.isSelected() });
+            swingWorker.setOperation("findMissionsBySucFin");
+            swingWorker.setFinished(finishedCheckBox.isSelected());
+            swingWorker.setSuccessful(successfulCheckBox.isSelected());
             swingWorker.execute();
         });
 
@@ -264,7 +265,8 @@ public class AppGui {
                 return;
             }
             FindMissionsSwingWorker swingWorker = new FindMissionsSwingWorker();
-            swingWorker.setArgs(new Object[]{ "findMissionsByMinAgRank", minAgRankSpinner.getValue() });
+            swingWorker.setOperation("findMissionsByMinAgRank");
+            swingWorker.setMinAgRank((int) minAgRankSpinner.getValue());
             swingWorker.execute();
         });
     }
@@ -414,6 +416,7 @@ public class AppGui {
             try {
                 get();
                 agentTableModel.deleteData(agentTableIndex);
+                assignmentTableModel.getAgents().remove(agentToDeleteId);
             } catch (ExecutionException ex) {
                 logger.error("Error in executing deleteAgent: {}", ex.getMessage(), ex.getCause());
                 JOptionPane.showMessageDialog(mainPanel, rb.getString("agentDeleteFailed"),
@@ -430,19 +433,32 @@ public class AppGui {
             List<Assignment> toEnd = assignmentManager.findAssignmentsOfAgent(agentToDeleteId);
             toEnd.removeIf((assignment) -> assignment.getEnd() != null);
             for (Assignment a : toEnd) {
-                a.setEnd(LocalDate.now(Clock.systemUTC()));
-                getAssignmentManager().updateAssignment(a);
+                getAssignmentManager().deleteAssignment(a);
             }
             return null;
         }
     }
 
     private class FindAgentsSwingWorker extends SwingWorker<List<Agent>, Void> {
-        //args[0] = string representing find operation, args[1] = parameters for operation
-        private Object[] args;
+        private String operation;
+        private String specialPower;
+        private boolean alive;
+        private int rank;
 
-        public void setArgs(Object[] args) {
-            this.args = args;
+        public void setOperation(String operation) {
+            this.operation = operation;
+        }
+
+        public void setSpecialPower(String specialPower) {
+            this.specialPower = specialPower;
+        }
+
+        public void setAlive(boolean alive) {
+            this.alive = alive;
+        }
+
+        public void setRank(int rank) {
+            this.rank = rank;
         }
 
         @Override
@@ -454,7 +470,7 @@ public class AppGui {
                     agentTableModel.addData(a);
                 }
             } catch (ExecutionException ex) {
-                logger.error("Error in executing " + args[0].toString() + ": {}", ex.getMessage(), ex.getCause());
+                logger.error("Error in executing " + operation + ": {}", ex.getMessage(), ex.getCause());
                 JOptionPane.showMessageDialog(mainPanel, rb.getString("agentFindFailed"),
                         rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             } catch (InterruptedException ex) {
@@ -464,15 +480,15 @@ public class AppGui {
 
         @Override
         protected List<Agent> doInBackground() throws Exception {
-            switch (args[0].toString()) {
+            switch (operation) {
                 case "findAllAgents":
                     return agentManager.findAllAgents();
                 case "findAgentsBySpecialPower":
-                    return agentManager.findAgentsBySpecialPower((String) args[1]);
+                    return agentManager.findAgentsBySpecialPower(specialPower);
                 case "findAgentsByAlive":
-                    return agentManager.findAgentsByAlive((boolean) args[1]);
+                    return agentManager.findAgentsByAlive(alive);
                 case "findAgentsByRank":
-                    return agentManager.findAgentsByRank((int) args[1]);
+                    return agentManager.findAgentsByRank(rank);
                 default:
                     throw new IllegalArgumentException("Cannot parse operation");
             }
@@ -496,6 +512,7 @@ public class AppGui {
             try {
                 get();
                 missionTableModel.deleteData(missionTableIndex);
+                assignmentTableModel.getMissions().remove(missionToDeleteId);
             } catch (ExecutionException ex) {
                 logger.error("Error in executing deleteMission: {}", ex.getMessage(), ex.getCause());
                 JOptionPane.showMessageDialog(mainPanel, rb.getString("missionDeleteFailed"),
@@ -512,19 +529,32 @@ public class AppGui {
             List<Assignment> toEnd = assignmentManager.findAssignmentsOfMission(missionToDeleteId);
             toEnd.removeIf((assignment) -> assignment.getEnd() != null);
             for (Assignment a : toEnd) {
-                a.setEnd(LocalDate.now(Clock.systemUTC()));
-                getAssignmentManager().updateAssignment(a);
+                assignmentManager.deleteAssignment(a);
             }
             return null;
         }
     }
 
     private class FindMissionsSwingWorker extends SwingWorker<List<Mission>, Void> {
-        //args[0] = string representing find operation, args[1], args[2] = parameters for operation
-        private Object[] args;
+        private String operation;
+        private boolean finished;
+        private boolean successful;
+        private int minAgRank;
 
-        public void setArgs(Object[] args) {
-            this.args = args;
+        public void setOperation(String operation) {
+            this.operation = operation;
+        }
+
+        public void setFinished(boolean finished) {
+            this.finished = finished;
+        }
+
+        public void setSuccessful(boolean successful) {
+            this.successful = successful;
+        }
+
+        public void setMinAgRank(int minAgRank) {
+            this.minAgRank = minAgRank;
         }
 
         @Override
@@ -536,7 +566,7 @@ public class AppGui {
                     missionTableModel.addData(m);
                 }
             } catch (ExecutionException ex) {
-                logger.error("Error in executing " + args[0].toString() + ": {}", ex.getMessage(), ex.getCause());
+                logger.error("Error in executing " + operation + ": {}", ex.getMessage(), ex.getCause());
                 JOptionPane.showMessageDialog(mainPanel, rb.getString("missionFindFailed"),
                         rb.getString("errorDialogTitle"), JOptionPane.ERROR_MESSAGE);
             } catch (InterruptedException ex) {
@@ -546,16 +576,16 @@ public class AppGui {
 
         @Override
         protected List<Mission> doInBackground() throws Exception {
-            switch (args[0].toString()) {
+            switch (operation) {
                 case "findAllMissions":
                     return missionManager.findAllMissions();
                 case "findMissionsBySucFin": {
-                    List<Mission> result = missionManager.findMissionsBySuccess((boolean) args[1]);
-                    result.removeIf((mission) -> mission.isFinished() != (boolean) args[2]);
+                    List<Mission> result = missionManager.findMissionsBySuccess(successful);
+                    result.removeIf((mission) -> mission.isFinished() != finished);
                     return result;
                 }
                 case "findMissionsByMinAgRank":
-                    return missionManager.findMissionsByMinAgentRank((int) args[1]);
+                    return missionManager.findMissionsByMinAgentRank(minAgRank);
                 default:
                     throw new IllegalArgumentException("Cannot parse operation");
             }
@@ -632,7 +662,7 @@ public class AppGui {
     }
 
     private class FindAssignmentsSwingWorker extends SwingWorker<List<Assignment>, Void> {
-        String operation;
+        private String operation;
 
         public void setOperation(String operation) {
             this.operation = operation;
@@ -677,7 +707,7 @@ public class AppGui {
             ex.printStackTrace();
         }
 
-        locale = Locale.getDefault();
+        Locale locale = Locale.getDefault();
         rb = ResourceBundle.getBundle("guiApp.localization", locale);
         dialogLocalizedOptions = new Object[] { rb.getString("OK"), rb.getString("cancel") };
         prepareDataSourceAndDb();
@@ -692,12 +722,12 @@ public class AppGui {
                      ObjectOutputStream missionsOOS = new ObjectOutputStream(new FileOutputStream(
                              "additionalResources/serialization/missionStrings.ser")))
                 {
-                    logger.debug("Serialization of hashmaps...");
+                    logger.debug("Serialization of Agent and Mission Strings hashMaps ...");
                     agentsOOS.writeObject(assignmentTableModel.getAgents());
                     missionsOOS.writeObject(assignmentTableModel.getMissions());
-                    logger.debug("Serialization of hashmaps finished...");
+                    logger.debug("Serialization of Agent and Mission Strings hashMaps finished ...");
                 } catch (IOException ex) {
-                    logger.error("Serialization of hashmaps failed", ex);
+                    logger.error("Serialization of Agent and Mission Strings hashMaps failed!", ex);
                     System.exit(3);
                 }
                 System.exit(0);

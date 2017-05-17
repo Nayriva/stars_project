@@ -3,7 +3,6 @@ package guiApp;
 import cz.muni.fi.pv168.db_backend.backend.Assignment;
 import cz.muni.fi.pv168.db_backend.backend.Mission;
 import cz.muni.fi.pv168.db_backend.common.MissionBuilder;
-import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

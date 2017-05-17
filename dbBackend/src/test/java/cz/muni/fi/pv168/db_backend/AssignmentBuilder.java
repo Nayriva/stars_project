@@ -1,8 +1,6 @@
 package cz.muni.fi.pv168.db_backend;
 
-import cz.muni.fi.pv168.db_backend.backend.Agent;
 import cz.muni.fi.pv168.db_backend.backend.Assignment;
-import cz.muni.fi.pv168.db_backend.backend.Mission;
 
 import java.time.LocalDate;
 

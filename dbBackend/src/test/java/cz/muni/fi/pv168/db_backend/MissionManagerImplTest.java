@@ -561,7 +561,7 @@ public class MissionManagerImplTest {
         Mission mission = sampleMission().build();
         manager.createMission(mission);
 
-        testExpectedServiceFailureException((manager) -> manager.findAllMissions());
+        testExpectedServiceFailureException(MissionManager::findAllMissions);
     }
 
     //-----------------------

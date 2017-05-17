@@ -21,7 +21,7 @@ public class AgentTableModel extends AbstractTableModel {
         ALIVE(Boolean.class, Agent::isAlive),
         RANK(Integer.class, Agent::getRank);
 
-        private Column(Class<?> columnType, Function<Agent, Object> valueExtractor) {
+        Column(Class<?> columnType, Function<Agent, Object> valueExtractor) {
             this.columnType = columnType;
             this.valueExtractor = valueExtractor;
         }

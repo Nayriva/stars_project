@@ -1,7 +1,6 @@
 package cz.muni.fi.pv168.db_backend;
 
 import cz.muni.fi.pv168.db_backend.backend.Agent;
-import cz.muni.fi.pv168.db_backend.backend.AgentManagerImpl;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -65,7 +64,7 @@ public class AgentTest {
 
     @Test
     public void hashcodeNOK() {
-        assertNotEquals(sampleAgent.hashCode(), unequalAgent.hashCode());;
+        assertNotEquals(sampleAgent.hashCode(), unequalAgent.hashCode());
     }
 
     @Test

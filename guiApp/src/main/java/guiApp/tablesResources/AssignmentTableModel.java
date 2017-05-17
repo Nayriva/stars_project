@@ -20,6 +20,7 @@ public class AssignmentTableModel extends AbstractTableModel {
     private Map<Long, String> missions = new HashMap<>();
     private Map<Long, String> agents = new HashMap<>();
 
+    @SuppressWarnings("unchecked")
     public AssignmentTableModel() {
         try (ObjectInputStream agentsOIS = new ObjectInputStream(new FileInputStream(
                 "additionalResources/serialization/agentStrings.ser"));

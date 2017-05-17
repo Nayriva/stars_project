@@ -4,7 +4,6 @@ import cz.muni.fi.pv168.db_backend.backend.Agent;
 import cz.muni.fi.pv168.db_backend.backend.Assignment;
 import cz.muni.fi.pv168.db_backend.backend.Mission;
 import cz.muni.fi.pv168.db_backend.common.AssignmentBuilder;
-import cz.muni.fi.pv168.db_backend.common.ServiceFailureException;
 import guiApp.tablesResources.AssignmentAgentTableModel;
 import guiApp.tablesResources.AssignmentMissionTableModel;
 import guiApp.tablesResources.LocalizedHeaderRendered;
