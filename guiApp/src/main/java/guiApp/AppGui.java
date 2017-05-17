@@ -161,15 +161,9 @@ public class AppGui {
         deleteAgentButton.addActionListener((ActionEvent e) -> deleteAgent());
 
         listAllAgentsButton.addActionListener((ActionEvent e) -> {
-<<<<<<< HEAD
             FindAgentsSwingWorker swingWorker = new FindAgentsSwingWorker();
             swingWorker.setOperation("findAllAgents");
             swingWorker.execute();
-=======
-            FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-            sw.setArgs(new Object[] {"findAllAgents"});
-            sw.execute();
->>>>>>> 155efb123758cce2b2c8e16162f4cb8b74e0a772
         });
 
         listAliveAgentsButton.addActionListener((ActionEvent e) -> {
