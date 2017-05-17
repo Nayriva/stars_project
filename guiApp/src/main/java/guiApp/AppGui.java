@@ -142,11 +142,8 @@ public class AppGui {
         missionManager = new MissionManagerImpl();
 
         try {
-            Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
             ds = Main.createDB();
             DBUtils.tryCreateTables(ds, Main.class.getResource("backend/createTables.sql"));
-        } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
-            System.exit(1);
         } catch (IOException | SQLException e) {
             System.exit(2);
         }
@@ -165,7 +162,7 @@ public class AppGui {
 
         listAllAgentsButton.addActionListener((ActionEvent e) -> {
             FindAgentsSwingWorker sw = new FindAgentsSwingWorker();
-            sw.setArgs(new Object[]{"findAllAgents"});
+            sw.setArgs(new Object[] {"findAllAgents"});
             sw.execute();
         });
 
