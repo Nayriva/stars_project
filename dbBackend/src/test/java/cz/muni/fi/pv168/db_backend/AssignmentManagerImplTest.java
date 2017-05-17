@@ -45,7 +45,7 @@ public class AssignmentManagerImplTest {
     private Mission notInDBMission;
 
     private final static ZonedDateTime NOW
-            = LocalDateTime.of(2015, FEBRUARY, 20, 14, 00).atZone(ZoneId.of("UTC"));
+            = LocalDateTime.of(2015, FEBRUARY, 20, 14, 0).atZone(ZoneId.of("UTC"));
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -695,27 +695,21 @@ public class AssignmentManagerImplTest {
     public void findActiveAssignmentsWithSQLExceptionThrown() throws SQLException {
         Assignment assignment = sampleAssignment().build();
         manager.createAssignment(assignment);
-        testExpectedServiceFailureException(
-                (manager) -> manager.findActiveAssignments()
-        );
+        testExpectedServiceFailureException(AssignmentManager::findActiveAssignments);
     }
 
     @Test
     public void findExpiredAssignmentsWithSQLExceptionThrown() throws SQLException {
         Assignment assignment = sampleAssignment().build();
         manager.createAssignment(assignment);
-        testExpectedServiceFailureException(
-                (manager) -> manager.findEndedAssignments()
-        );
+        testExpectedServiceFailureException(AssignmentManager::findEndedAssignments);
     }
 
     @Test
     public void findAllAssignmentsWithSQLExceptionThrown() throws SQLException {
         Assignment assignment = sampleAssignment().build();
         manager.createAssignment(assignment);
-        testExpectedServiceFailureException(
-                (manager) -> manager.findActiveAssignments()
-        );
+        testExpectedServiceFailureException(AssignmentManager::findActiveAssignments);
     }
 
     //-----------------------

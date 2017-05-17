@@ -519,7 +519,7 @@ public class AgentManagerImplTest {
         Agent agent = sampleAgent().build();
         manager.createAgent(agent);
 
-        testExpectedServiceFailureException((manager) -> manager.findAllAgents());
+        testExpectedServiceFailureException(AgentManager::findAllAgents);
     }
 
     //-----------------------

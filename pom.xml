@@ -12,6 +12,7 @@
     <modules>
         <module>webApp</module>
         <module>dbBackend</module>
+        <module>guiApp</module>
     </modules>
 
     <developers>
