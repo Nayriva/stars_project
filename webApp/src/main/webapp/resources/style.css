@@ -1,0 +1,174 @@
+@import url(http://fonts.googleapis.com/css?family=Roboto:400,500,700,300,100);
+
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Roboto", helvetica, arial, sans-serif;
+}
+
+body {
+    background-image: url(bg.png);
+}
+
+#banner {
+    background-color: #483737;
+    text-align: center;
+    height: 100%;
+}
+
+#bannerImg {
+    margin: auto;
+}
+
+#container {
+    background-color: rgba(255, 255, 255, 0.2);
+    margin: 1% auto;
+    width: 90%;
+    padding: 1%;
+    opacity: 10;
+}
+
+#warning {
+    background-color: red;
+    margin: 1.5% auto 0.5% auto;
+    padding: 0.5%;
+    border: 2px solid black;
+    text-align: center;
+    font-size: 18px;
+    color: white;
+}
+
+#navbar {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #1b1e24;
+    width: 100%;
+}
+
+#navbar li {
+    float: left;
+}
+
+#navbar li button {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    background: #1b1e24;
+    border: 1px solid #1b1e24;
+}
+
+#navbar li button:hover {
+    background: #2d393f;
+    border: 1px solid #2D393F;
+}
+
+button:focus {
+    outline: none;;
+    border: none;
+}
+
+button:active {
+    outline: none;
+    border: none;
+}
+
+table {
+    border-collapse: collapse;
+    margin: auto;
+}
+
+th, td, tr {
+    padding: 4px 15px;
+}
+
+th {
+    color:#D5DDE5;;
+    background:#1b1e24;
+    border-bottom: 3px solid #9ea7af;
+    border-right: 1px solid #343a45;
+    font-size: 18px;
+    font-weight: 100;
+    text-align: center;
+}
+
+tr {
+    border: 1px solid #C1C3D1;
+    border-left:none;
+    background: #EBEBEB;
+    color:#666B85;
+    font-size:16px;
+    font-weight:normal;
+}
+
+td {
+    border: 1px solid #C1C3D1;
+    border-left: none;
+}
+
+.editTables th, .createTables th {
+    border-bottom: none;
+    border-right: 3px solid #9EA7AF;
+}
+
+.tableHeader th {
+    border: none;
+}
+
+.tableButtons {
+    border: none;
+    font-size : 18px;
+    padding : 4px 17px;
+    color: #343a45;
+    background: rgb(190, 190, 204);
+    font-weight: 100;
+    text-align: center;
+    outline: none;
+    width: 100%;
+}
+
+.tableButtons:hover {
+    background: rgb(150, 150, 164);
+    outline: none;
+    border: none;
+}
+
+.tableButtons:focus {
+    outline: none;
+    border: none;
+}
+
+/** ALERTS **/
+.alert {
+    padding: 20px;
+    background-color: #f44336; /* Red */
+    color: white;
+    margin-bottom: 15px;
+}
+
+/* The close button */
+.closebtn {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* When moving the mouse over the close button */
+.closebtn:hover {
+    color: black;
+}
+
+.btnInTable {
+    padding: 0;
+    text-align: center;
+    border-right: none;
+    border-left: none;
+}
